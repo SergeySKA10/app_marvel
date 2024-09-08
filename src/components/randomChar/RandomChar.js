@@ -1,22 +1,42 @@
 import { Component } from 'react';
+
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 import MarvelService from '../../services/MarvelService';
+
 import './randomChar.scss';
 import mjolnir from '../../resources/img/mjolnir.png';
 
 export default class RandomChar extends Component {
-    constructor(props) {
-        super(props);
-        this.getRandomChar();
-    }
-
     state = {
         char: {},
         loading: true,
         error: false
     };
 
+    componentDidMount() {
+        // первичное получение данных для отображения рандомного героя
+        this.getRandomChar();
+        // обновление данных для отображения рандомного героя через каждые 60 сек.
+        this.timerID = setInterval(this.getRandomChar, 60000)
+    }
+
+    componentWillUnmount() {
+        // удаление интервала
+        clearInterval(this.timerID);
+    }
+
+    // функция обновления интервала отображения рандомного героя (запуск или удаление this.timerID)
+    uploadInterval = () => {
+        if (this.timerID) {
+            clearInterval(this.timerID);
+            this.timerID = 0;
+        } else {
+            this.timerID = setInterval(this.getRandomChar, 60000)
+        }
+    }
+
+    // функция обновления state.char and loading после получения данных с сервера
     onCharLoaded = (char) => {
         this.setState({
             char, 
@@ -24,6 +44,7 @@ export default class RandomChar extends Component {
         });
     }
 
+    // функция обновления state.error
     onError = () => {
         this.setState({
             loading: false,
@@ -31,26 +52,28 @@ export default class RandomChar extends Component {
         })
     }
 
+    // функция по получению нового героя
     getRandomChar = () => {
-        console.log('upload');
+        // формирование рандомного id (цифры из бд Marvel)
         const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011000),
               marvelService = new MarvelService();
 
         marvelService.getCharacter(id)
                    .then(this.onCharLoaded)
                    .catch(this.onError);
-
-        // marvelService.getAllCharacters().then(data => console.log(data));
     }
 
     render() {
         const {char, loading, error} = this.state,
+              // условия отображаемого контента
               spinner = loading ? <Loading/> : null,
               errorMessage = error ? <ErrorMessage/> : null,
               content = !(loading || error) ? <View char={char}/> : null;
 
         return (
-            <div className="randomchar">
+            <div className="randomchar" 
+                 onMouseEnter={this.uploadInterval}
+                 onMouseLeave={this.uploadInterval}>
                 {spinner}
                 {errorMessage}
                 {content}
@@ -62,7 +85,7 @@ export default class RandomChar extends Component {
                     <p className="randomchar__title">
                         Or choose another one
                     </p>
-                    <button className="button button__main">
+                    <button className="button button__main" onClick={this.getRandomChar}>
                         <div className="inner">try it</div>
                     </button>
                     <img src={mjolnir} alt="mjolnir" className="randomchar__decoration"/>
@@ -72,6 +95,7 @@ export default class RandomChar extends Component {
     }
 }
 
+// компонент загрузочного экрана (спиннер)
 const Loading = () => {
     return (
         <div className="randomchar__block">
@@ -81,11 +105,13 @@ const Loading = () => {
     )
 }
 
+// компонент отображаемого контента в случае успешного получения данных с сервера
 const View = ({char}) => {
     const {name, description, thumbnail, homepage, wiki} = char;
+    const stylePichureHero = thumbnail.includes('image_not_available') ? {objectFit: 'contain'} : null
     return (
         <div className="randomchar__block">
-            <img src={thumbnail} alt="Random character" className="randomchar__img"/>
+            <img src={thumbnail} alt="Random character" className="randomchar__img" style={stylePichureHero}/>
             <div className="randomchar__info">
                 <p className="randomchar__name">{name}</p>
                 <p className="randomchar__descr">
