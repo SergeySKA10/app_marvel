@@ -32,6 +32,7 @@ export default class MarvelService {
     // функция - трансформатор данных - выборка нужных данных для последующей работы 
     _transformCharacter = (data) => {
         return {
+            id: data.id,
             name: data.name ? data.name : 'Герой не найден',
 
             description: !data.description ? 
