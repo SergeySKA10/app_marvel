@@ -1,8 +1,9 @@
 const _api = process.env.REACT_APP_MY_API_KEY; // api ключ
 
 export default class MarvelService {
-    constructor() {
+    constructor(offset) {
         this._apiKey = _api;
+        this.offset = offset; // число для формирования отступа в БД Marvel по запосам (исключение повторений героев)
     }
     _apiBase = 'https://gateway.marvel.com:443/v1/public/'; // строка постоянного адреса для запросов
 
@@ -19,7 +20,7 @@ export default class MarvelService {
 
     // функция по получению нескольких героев (9шт)
     getAllCharacters = async () => {
-        const res = await this.getResource(`${this._apiBase}characters?limit=9&apikey=${this._apiKey}`);
+        const res = await this.getResource(`${this._apiBase}characters?limit=9&offset=${this.offset}&apikey=${this._apiKey}`);
         return res.data.results.map(this._transformCharacter);
     }
 
@@ -42,7 +43,8 @@ export default class MarvelService {
 
             thumbnail: `${data.thumbnail.path}.${data.thumbnail.extension}`,
             homepage: data.urls[0].url,
-            wiki: data.urls[1].url
+            wiki: data.urls[1].url,
+            comics: data.comics.items.slice(0, 10)
         }
     }
 }

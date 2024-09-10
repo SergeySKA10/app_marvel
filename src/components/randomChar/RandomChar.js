@@ -52,11 +52,20 @@ export default class RandomChar extends Component {
         })
     }
 
+    //функция по показу спинера между загрузками
+    onCharLoading = () => {
+        this.setState({
+            loading: true
+        });
+    }
+
     // функция по получению нового героя
     getRandomChar = () => {
         // формирование рандомного id (цифры из бд Marvel)
         const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011000),
               marvelService = new MarvelService();
+
+        this.onCharLoading(); // реализация спинера между загрузками контента
 
         marvelService.getCharacter(id)
                    .then(this.onCharLoaded)

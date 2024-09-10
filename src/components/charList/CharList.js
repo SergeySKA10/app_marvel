@@ -10,7 +10,8 @@ export default class CharList extends Component {
     state = {
         chars: [],
         loading: true,
-        error: false
+        error: false,
+        offset: 0
     }
 
     componentDidMount() {
@@ -23,7 +24,8 @@ export default class CharList extends Component {
         const data = [...this.state.chars, ...chars]
         this.setState({
             chars: data,
-            loading: false
+            loading: false,
+            offset: this.state.offset + 9
         });
     }
 
@@ -37,7 +39,7 @@ export default class CharList extends Component {
 
     // функция обновления списка героев
     uploadCharList = () => {
-        const marvelService = new MarvelService();
+        const marvelService = new MarvelService(this.state.offset);
 
         marvelService.getAllCharacters()
                      .then(this.onLoadedChars)
@@ -50,7 +52,7 @@ export default class CharList extends Component {
             const stylePichureHero = el.thumbnail.includes('image_not_available') ? {objectFit: 'contain'} : null;
 
             return (
-                <li className="char__item" key={el.id}>
+                <li className="char__item" key={el.id} onClick={() => this.props.onCharSelected(el.id)}>
                     <img src={el.thumbnail} alt={el.description} style={stylePichureHero}/>
                     <div className="char__name">{el.name}</div>
                 </li>
@@ -62,7 +64,7 @@ export default class CharList extends Component {
         const {chars, loading, error} = this.state,
               list = this._createCharList(chars),
               // условия отображаемого контента
-              styleWrapper = loading ? {gridTemplateColumns: 'repeat(1, 650px)'} : null,
+              styleWrapper = loading || error ? {gridTemplateColumns: 'repeat(1, 650px)'} : null,
               spinner = loading ? <Spinner/> : null,
               errorMessage = error ? <ErrorMessage/> : null,
               contentList = !(loading || error) ? <ViewList list={list}/>: null;
