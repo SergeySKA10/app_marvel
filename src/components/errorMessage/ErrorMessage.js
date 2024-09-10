@@ -2,7 +2,11 @@ import img from '../../resources/img/error.gif';
 
 const ErrorMessage = () => {
     return (
-        <img style={{display: 'block', width: "250px", height: "250px", objectFit: 'contain', margin: "0 auto"}} src={img} alt="Message about error" />
+        <div style={{display: 'block', margin: "0 auto", alignContent: 'center'}}>
+            <img style={{display: 'block', width: "150px", height: "150px", objectFit: 'contain', margin: "0 auto"}} src={img} alt="Message about error" />
+            <p style={{textAlign: 'center', color: '#9F0013'}}>Произошла ошибка при загурзке данных с сервера</p>
+        </div>
+        
     )
 }
 

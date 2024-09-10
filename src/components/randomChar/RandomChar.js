@@ -80,7 +80,7 @@ export default class RandomChar extends Component {
               content = !(loading || error) ? <View char={char}/> : null;
 
         return (
-            <div className="randomchar" 
+            <div className="randomchar"
                  onMouseEnter={this.uploadInterval}
                  onMouseLeave={this.uploadInterval}>
                 {spinner}

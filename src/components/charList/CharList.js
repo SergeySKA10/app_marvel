@@ -11,7 +11,9 @@ export default class CharList extends Component {
         chars: [],
         loading: true,
         error: false,
-        offset: 0
+        offset: 0,
+        newItemsLoading: false,
+        charEnded: false
     }
 
     componentDidMount() {
@@ -21,11 +23,26 @@ export default class CharList extends Component {
 
     // функция изменения состония chars and loading
     onLoadedChars = (chars) => {
+        let ended = false;
+
+        if (chars.length < 9) {
+            ended = true;
+        }
+
         const data = [...this.state.chars, ...chars]
-        this.setState({
+        this.setState(({offset}) => ({
             chars: data,
             loading: false,
-            offset: this.state.offset + 9
+            offset: offset + 9,
+            newItemsLoading: false,
+            charEnded: ended
+        }));
+    }
+
+    // функция по изменению состояния newItemsLoading при загрузке
+    onCharListLoading = () => {
+        this.setState({
+            newItemsLoading: true
         });
     }
 
@@ -41,9 +58,11 @@ export default class CharList extends Component {
     uploadCharList = () => {
         const marvelService = new MarvelService(this.state.offset);
 
+        this.onCharListLoading();
+
         marvelService.getAllCharacters()
                      .then(this.onLoadedChars)
-                     .catch(this.error);
+                     .catch(this.onError);
     }
 
     // функция формирования списка
@@ -61,13 +80,14 @@ export default class CharList extends Component {
     }
 
     render() {
-        const {chars, loading, error} = this.state,
+        const {chars, loading, error, newItemsLoading, charEnded} = this.state,
               list = this._createCharList(chars),
               // условия отображаемого контента
               styleWrapper = loading || error ? {gridTemplateColumns: 'repeat(1, 650px)'} : null,
               spinner = loading ? <Spinner/> : null,
               errorMessage = error ? <ErrorMessage/> : null,
               contentList = !(loading || error) ? <ViewList list={list}/>: null;
+            
 
         return (
             <div className="char__list">
@@ -76,7 +96,9 @@ export default class CharList extends Component {
                     {errorMessage}
                     {contentList}
                 </ul>
-                <button className="button button__main button__long">
+                <button className="button button__main button__long"
+                        disabled={newItemsLoading}
+                        style={{'display': charEnded ? 'none' : null}}>
                     <div className="inner" onClick={this.uploadCharList}>load more</div>
                 </button>
             </div>
@@ -93,3 +115,4 @@ const ViewList = ({list}) => {
         </ul>
     );
 }
+

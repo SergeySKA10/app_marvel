@@ -33,6 +33,8 @@ export default class CharInfo extends Component {
             char, 
             loading: false
         });
+
+        
     }
 
     // функция обновления state.error при ошибке запроса
@@ -67,12 +69,12 @@ export default class CharInfo extends Component {
 
     render() {
         const {char, loading, error} = this.state,
+        
               // условия отображаемого контента
               skeleton = loading || error || char ? null :  <Skeleton/>,
               spinner = loading ? <Spinner/> : null,
               errorMessage = error ? <ErrorMessage/> : null,
               content = !(loading || error || !char) ? <ContentView char={char}/> : null;
-
         return (
             <div className="char__info">
                 {skeleton}
