@@ -7,6 +7,7 @@ import ErrorMessage from '../errorMessage/ErrorMessage';
 import './charList.scss';
 
 export default class CharList extends Component {
+    charsRef = [];
     state = {
         chars: [],
         loading: true,
@@ -65,29 +66,46 @@ export default class CharList extends Component {
                      .catch(this.onError);
     }
 
+    setItemRef = (elem) => {
+            this.charsRef.push(elem);
+    }
+
+    onFocus = (i) => {
+        this.charsRef[i].focus();
+        this.charsRef.forEach(el => el.classList.remove('char__item_selected'));
+        this.charsRef[i].classList.add('char__item_selected'); 
+    }
+
     // функция формирования списка
     _createCharList = (data) => {
-        return data.map(el => {
+        return data.map((el, i) => {
             const stylePichureHero = el.thumbnail.includes('image_not_available') ? {objectFit: 'contain'} : null;
 
             return (
-                <li className="char__item" key={el.id} onClick={() => this.props.onCharSelected(el.id)}>
+                <li ref={this.setItemRef} 
+                    className="char__item" 
+                    key={el.id} 
+                    tabIndex={0} 
+                    onClick={() => {this.props.onCharSelected(el.id); this.onFocus(i)}}>
+
                     <img src={el.thumbnail} alt={el.description} style={stylePichureHero}/>
                     <div className="char__name">{el.name}</div>
+
                 </li>
             );
         });
     }
 
+
     render() {
         const {chars, loading, error, newItemsLoading, charEnded} = this.state,
               list = this._createCharList(chars),
+              
               // условия отображаемого контента
               styleWrapper = loading || error ? {gridTemplateColumns: 'repeat(1, 650px)'} : null,
               spinner = loading ? <Spinner/> : null,
               errorMessage = error ? <ErrorMessage/> : null,
               contentList = !(loading || error) ? <ViewList list={list}/>: null;
-            
 
         return (
             <div className="char__list">
