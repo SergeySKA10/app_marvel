@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import PropTypes from 'prop-types';
 
 import MarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/Spinner';
@@ -10,6 +11,7 @@ import './charInfo.scss';
 export default class CharInfo extends Component {
     state = {
         char: null,
+        comics: null,
         loading: false,
         error: false
     }
@@ -27,14 +29,19 @@ export default class CharInfo extends Component {
         }
     }
 
-    // функция обновления state.char and loading после получения данных с сервера
+    // функция обновления char, comics and loading после получения данных с сервера
     onCharLoaded = (char) => {
-        this.setState({
-            char, 
-            loading: false
-        });
-
-        
+        this.marvelService
+            .getComics(this.props.charId)
+            .then(comics => {
+                this.setState({
+                    char,
+                    comics: comics.slice(0, 10), 
+                    loading: false
+                });
+            })
+            .catch(this.onError);
+         
     }
 
     // функция обновления state.error при ошибке запроса
@@ -63,18 +70,20 @@ export default class CharInfo extends Component {
         this.marvelService
             .getCharacter(this.props.charId)
             .then(this.onCharLoaded)
-            .catch(this.onError);
+            .catch(this.onError);      
     }
 
 
     render() {
-        const {char, loading, error} = this.state,
+        const {char, comics, loading, error} = this.state,
         
               // условия отображаемого контента
-              skeleton = loading || error || char ? null :  <Skeleton/>,
+              skeleton = loading || error || char || comics ? null :  <Skeleton/>,
               spinner = loading ? <Spinner/> : null,
               errorMessage = error ? <ErrorMessage/> : null,
-              content = !(loading || error || !char) ? <ContentView char={char}/> : null;
+              content = !(loading || error || !char || !comics ) ? <ContentView char={char} comics={comics}/> : null;
+
+        
         return (
             <div className="char__info">
                 {skeleton}
@@ -86,18 +95,23 @@ export default class CharInfo extends Component {
     }
 }
 
-const ContentView = ({char}) => {
-    const {name, description, thumbnail, homepage, wiki, comics} = char,
+CharInfo.propTypes = {
+    charId: PropTypes.number
+}
+
+const ContentView = (props) => {
+    const {name, description, thumbnail, homepage, wiki} = props.char,
           stylePichureHero = thumbnail.includes('image_not_available') ? {objectFit: 'contain'} : null;
 
-    const comicsList = comics.length === 0 ? 'К сожалению комиксы с данным героем отсутствуют':
-    comics.map((el, i) => {
-        return (
-            <li className="char__comics-item" key={i}>
-                <a href={el.resourceURI}>{el.name}</a>
-            </li>
-        );
-    });
+    const comicsList = props.comics.length === 0 ? 
+                            'К сожалению комиксы с данным героем отсутствуют':
+                            props.comics.map((el, i) => {
+                                return (
+                                    <li className="char__comics-item" key={i}>
+                                        <a href={el.url}>{el.name}</a>
+                                    </li>
+                                );
+                            });
 
     return (
         <>
@@ -124,4 +138,8 @@ const ContentView = ({char}) => {
             </ul>
         </>
     );
+}
+
+ContentView.propTypes = {
+    comics: PropTypes.array
 }

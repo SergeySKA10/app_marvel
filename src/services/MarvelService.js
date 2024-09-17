@@ -7,6 +7,8 @@ export default class MarvelService {
     }
     _apiBase = 'https://gateway.marvel.com:443/v1/public/'; // строка постоянного адреса для запросов
 
+    // characters/1017100/comics?apikey=
+
     // функция по полчению данных
     getResource = async (url) => {
         let result = await fetch(url);
@@ -16,6 +18,12 @@ export default class MarvelService {
         }
 
         return await result.json();
+    }
+
+    // функция по получению comics
+    getComics = async (id) => {
+        const res = await this.getResource(`${this._apiBase}characters/${id}/comics?apikey=${this._apiKey}`);
+        return res.data.results.map(this._transformComics);
     }
 
     // функция по получению нескольких героев (9шт)
@@ -28,6 +36,14 @@ export default class MarvelService {
     getCharacter = async (id) => {
         const res = await this.getResource(`${this._apiBase}characters/${id}?apikey=${this._apiKey}`);
         return this._transformCharacter(res.data.results[0]);
+    }
+
+    // функция - трансформатор данных - выборка нужных данных для последующей работы
+    _transformComics = (data) => {
+        return {
+            name: data.title,
+            url: data.urls[0].url
+        }
     }
 
     // функция - трансформатор данных - выборка нужных данных для последующей работы 
@@ -43,8 +59,7 @@ export default class MarvelService {
 
             thumbnail: `${data.thumbnail.path}.${data.thumbnail.extension}`,
             homepage: data.urls[0].url,
-            wiki: data.urls[1].url,
-            comics: data.comics.items.slice(0, 10)
+            wiki: data.urls[1].url
         }
     }
 }

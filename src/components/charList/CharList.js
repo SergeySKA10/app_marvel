@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import PropTypes from 'prop-types';
 
 import MarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/Spinner';
@@ -67,7 +68,7 @@ export default class CharList extends Component {
     }
 
     setItemRef = (elem) => {
-            this.charsRef.push(elem);
+        this.charsRef.push(elem);
     }
 
     onFocus = (i) => {
@@ -86,7 +87,16 @@ export default class CharList extends Component {
                     className="char__item" 
                     key={el.id} 
                     tabIndex={0} 
-                    onClick={() => {this.props.onCharSelected(el.id); this.onFocus(i)}}>
+                    onClick={() => {
+                        this.props.onCharSelected(el.id); 
+                        this.onFocus(i)
+                    }}
+                    onKeyDown={(e) => {
+                        if (e.key === ' ' || e.key === "Enter") {
+                            this.props.onCharSelected(el.id); 
+                            this.onFocus(i)
+                        }
+                    }}>
 
                     <img src={el.thumbnail} alt={el.description} style={stylePichureHero}/>
                     <div className="char__name">{el.name}</div>
@@ -105,7 +115,7 @@ export default class CharList extends Component {
               styleWrapper = loading || error ? {gridTemplateColumns: 'repeat(1, 650px)'} : null,
               spinner = loading ? <Spinner/> : null,
               errorMessage = error ? <ErrorMessage/> : null,
-              contentList = !(loading || error) ? <ViewList list={list}/>: null;
+              contentList = !(loading || error) ? list: null;
 
         return (
             <div className="char__list">
@@ -124,13 +134,8 @@ export default class CharList extends Component {
     }
 }
 
-// компонент отображаемого контента в случае успешного получения данных с сервера
-
-const ViewList = ({list}) => {
-    return (
-        <ul className="char__grid">
-            {list}
-        </ul>
-    );
+CharList.propTypes = {
+    onCharSelected: PropTypes.func
 }
+
 
