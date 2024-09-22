@@ -1,4 +1,5 @@
-import { Component } from 'react';
+//import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 import MarvelService from '../../services/MarvelService';
@@ -8,91 +9,154 @@ import Skeleton from '../skeleton/Skeleton';
 
 import './charInfo.scss';
 
-export default class CharInfo extends Component {
-    state = {
-        char: null,
-        comics: null,
-        loading: false,
-        error: false
-    }
+// export default class CharInfo extends Component {
+//     state = {
+//         char: null,
+//         comics: null,
+//         loading: false,
+//         error: false
+//     }
+
+//     // переменная по созданию запросов
+//     marvelService = new MarvelService();
+
+//     componentDidMount() {
+//         this.uploadCharInfo();
+//     }
+
+//     componentDidUpdate(prevProps) {
+//         if (this.props.charId !== prevProps.charId) {
+//             this.uploadCharInfo();
+//         }
+//     }
+
+//     // функция обновления char, comics and loading после получения данных с сервера
+//     onCharLoaded = (char) => {
+//         this.marvelService
+//             .getComics(this.props.charId)
+//             .then(comics => {
+//                 this.setState({
+//                     char,
+//                     comics: comics.slice(0, 10), 
+//                     loading: false
+//                 });
+//             })
+//             .catch(this.onError);
+         
+//     }
+
+//     // функция обновления state.error при ошибке запроса
+//     onError = () => {
+//         this.setState({
+//             loading: false,
+//             error: true
+//         });
+//     }
+
+//     // функция по показу спинера между загрузками
+//     onCharLoading = () => {
+//         this.setState({
+//             loading: true
+//         });
+//     }
+
+//     // функция по получению описания героя из списка
+//     uploadCharInfo = () => {
+//         if (!this.props.charId) {
+//             return
+//         }
+        
+//         this.onCharLoading();
+
+//         this.marvelService
+//             .getCharacter(this.props.charId)
+//             .then(this.onCharLoaded)
+//             .catch(this.onError);      
+//     }
+
+
+//     render() {
+//         const {char, comics, loading, error} = this.state,
+        
+//               // условия отображаемого контента
+//               skeleton = loading || error || char || comics ? null :  <Skeleton/>,
+//               spinner = loading ? <Spinner/> : null,
+//               errorMessage = error ? <ErrorMessage/> : null,
+//               content = !(loading || error || !char || !comics ) ? <ContentView char={char} comics={comics}/> : null;
+
+        
+//         return (
+//             <div className="char__info">
+//                 {skeleton}
+//                 {spinner}
+//                 {errorMessage}
+//                 {content}
+//             </div>
+//         );
+//     }
+// }
+
+const CharInfo = (props) => {
+    const [char, setChar] = useState(null),
+          [comics, setCommics] = useState(null),
+          [loading, setLoading] = useState(false),
+          [error, setError] =  useState(false);
 
     // переменная по созданию запросов
-    marvelService = new MarvelService();
+    const marvelService = new MarvelService();
 
-    componentDidMount() {
-        this.uploadCharInfo();
-    }
-
-    componentDidUpdate(prevProps) {
-        if (this.props.charId !== prevProps.charId) {
-            this.uploadCharInfo();
-        }
-    }
+    useEffect(() => {
+        console.log('upload char Info')
+        uploadCharInfo();
+    }, [props.charId]);
 
     // функция обновления char, comics and loading после получения данных с сервера
-    onCharLoaded = (char) => {
-        this.marvelService
-            .getComics(this.props.charId)
-            .then(comics => {
-                this.setState({
-                    char,
-                    comics: comics.slice(0, 10), 
-                    loading: false
-                });
+    const onCharLoaded = (newChar) => {
+        marvelService
+            .getComics(props.charId)
+            .then(newComics => {
+                setChar(char => newChar);
+                setCommics(comics => newComics.slice(0, 10));
+                setLoading(loading => false);
+                setError(error => false);
             })
-            .catch(this.onError);
+            .catch(onError);
          
     }
 
     // функция обновления state.error при ошибке запроса
-    onError = () => {
-        this.setState({
-            loading: false,
-            error: true
-        });
+    const onError = () => {
+        setError(error => true);
     }
 
     // функция по показу спинера между загрузками
-    onCharLoading = () => {
-        this.setState({
-            loading: true
-        });
+    const onCharLoading = () => {
+        setLoading(loading => true);
     }
 
     // функция по получению описания героя из списка
-    uploadCharInfo = () => {
-        if (!this.props.charId) {
+    const uploadCharInfo = () => {
+        if (!props.charId) {
             return
         }
         
-        this.onCharLoading();
+        onCharLoading();
 
-        this.marvelService
-            .getCharacter(this.props.charId)
-            .then(this.onCharLoaded)
-            .catch(this.onError);      
+        marvelService
+            .getCharacter(props.charId)
+            .then(onCharLoaded)
+            .catch(onError);      
     }
+    
 
-
-    render() {
-        const {char, comics, loading, error} = this.state,
-        
-              // условия отображаемого контента
-              skeleton = loading || error || char || comics ? null :  <Skeleton/>,
-              spinner = loading ? <Spinner/> : null,
-              errorMessage = error ? <ErrorMessage/> : null,
-              content = !(loading || error || !char || !comics ) ? <ContentView char={char} comics={comics}/> : null;
-
-        
-        return (
-            <div className="char__info">
-                {skeleton}
-                {spinner}
-                {errorMessage}
-                {content}
-            </div>
-        );
-    }
+    return (
+        <div className="char__info">
+            {loading || error || char || comics ? null :  <Skeleton/>}
+            {loading ? <Spinner/> : null}
+            {error ? <ErrorMessage/> : null}
+            {!(loading || error || !char || !comics ) ? <ContentView char={char} comics={comics}/> : null}
+        </div>
+    )
 }
 
 CharInfo.propTypes = {
@@ -143,3 +207,5 @@ const ContentView = (props) => {
 ContentView.propTypes = {
     comics: PropTypes.array
 }
+
+export default CharInfo;
