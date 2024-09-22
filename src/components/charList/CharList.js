@@ -136,6 +136,7 @@ import './charList.scss';
 //     }
 // }
 
+
 const CharList = (props) => {
     const [chars, setChars] = useState([]),
           [loading, setLoading] = useState(true),
@@ -143,7 +144,6 @@ const CharList = (props) => {
           [offset, setOffset] = useState(0),
           [newItemsLoading, setNewItemsLoading] = useState(false),
           [charEnded, setCharEnded] = useState(false);
-        //  [myRef, setMyref] = useState([]);
 
     useEffect(() => {
        uploadCharList();
@@ -156,26 +156,25 @@ const CharList = (props) => {
 
         if (newChars.length < 9) {
             ended = true;
-        }
+        } 
 
-        const data = [...chars, ...newChars]
-
-        setChars(chars => data);
-        setLoading(loading => false);
-        setCharEnded(charEnded => ended);
+        setChars(chars => [...chars, ...newChars]);
+        setLoading(false);
+        setCharEnded(ended);
         setNewItemsLoading(newItemsLoading => false);
         setOffset(offset => offset + 9);
+        setError(false)
     }
 
     // функция по изменению состояния newItemsLoading при загрузке
     const onCharListLoading = () => {
-        setNewItemsLoading(newItemsLoading => true);
+        setNewItemsLoading(true);
     }
 
     // функция изменения состония при ошибке
     const onError = () => {
-        setLoading(loading => false);
-        setError(error => true);
+        setLoading(false);
+        setError(true);
     }
 
     // функция обновления списка героев
@@ -189,25 +188,15 @@ const CharList = (props) => {
                      .catch(onError);
     }
 
-    
+    // создание ref 
+    const myRef = useRef([]);
 
-    // const setItemRef = (elem) => {
-    //     const data = [];
-    //     data.push(elem);
-    //     setMyref(myRef => {
-    //         return [...myRef, ...data];
-    //     })
-    // }
-
-    // useEffect(() => {
-    //     setItemRef();
-    // }, [setItemRef])
-
-    // const onFocus = (i) => {
-    //     myRef[i].focus();
-    //     myRef.forEach(el => el.classList.remove('char__item_selected'));
-    //     myRef[i].classList.add('char__item_selected'); 
-    // }
+    // функция фокуса и добавления класса активности выбранному элементу
+    const onFocus = (i) => {
+        myRef.current[i].focus();
+        myRef.current.forEach(el => el.classList.remove('char__item_selected'));
+        myRef.current[i].classList.add('char__item_selected'); 
+    }
 
     // функция формирования списка
     const _createCharList = (data) => {
@@ -216,18 +205,18 @@ const CharList = (props) => {
 
             return (
                 <li 
-                    //ref={setItemRef} 
+                    ref={el => myRef.current[i] = el} // с помощью "callback Ref" происходит добавление элементов в массив myRef
                     className="char__item" 
                     key={el.id} 
                     tabIndex={0} 
                     onClick={() => {
                         props.onCharSelected(el.id); 
-                       // onFocus(i)
+                        onFocus(i)
                     }}
                     onKeyDown={(e) => {
                         if (e.key === ' ' || e.key === "Enter") {
                             props.onCharSelected(el.id); 
-                          //  onFocus(i)
+                            onFocus(i)
                         }
                     }}>
 

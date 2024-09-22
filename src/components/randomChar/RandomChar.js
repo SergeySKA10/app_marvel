@@ -108,9 +108,9 @@ import mjolnir from '../../resources/img/mjolnir.png';
 const RandomChar = (props) => {
     const [char, setChar] = useState(null),
           [loading, setLoading] = useState(true),
-          [error, setError] = useState(false);
+          [error, setError] = useState(false),
+          [timer, setTimer] = useState(false); // state для остановки и запуска таймера
           
-
     
     let spinner = loading ? <Loading/> : null,
         errorMessage = error ? <ErrorMessage/> : null,
@@ -119,8 +119,22 @@ const RandomChar = (props) => {
     useEffect(() => {
         //первичное получение данных для отображения рандомного героя
         getRandomChar();
-        console.log('effect loading Herou');
     }, []);
+
+    // запуск таймера для обновления
+    useEffect(() => {
+        let timerId;
+
+        if (timer) {
+            clearInterval(timerId);
+            console.log('stop time')
+        } else {
+            timerId = setInterval(() => {getRandomChar(); console.log('newTimer')}, 60000);
+            console.log('play time')
+        }
+
+        return () => clearInterval(timerId);
+    }, [timer]);
 
     function getRandomChar() {
         // формирование рандомного id (цифры из бд Marvel)
@@ -140,14 +154,14 @@ const RandomChar = (props) => {
         setLoading(loading => false);
     };
 
-    //функция обновления интервала отображения рандомного героя (запуск или удаление this.timerID)
-    // const uploadInterval = () => {
-    //     if (timerId) {
-    //         setTimerId(timerId => clearInterval(timerId));
-    //     } else {
-    //         setTimerId(timerId => setInterval(getRandomChar, 6000));
-    //     }
-    // };
+    //функция обновления интервала отображения рандомного героя (запуск или удаление timerID)
+    const uploadInterval = () => {
+        if (timer) {
+            setTimer(false);
+        } else {
+            setTimer(true);
+        }
+    };
     
     // функция обновления state.error
     const onError = () => {
@@ -163,8 +177,8 @@ const RandomChar = (props) => {
 
     return (
         <div className="randomchar"
-                // onMouseEnter={uploadInterval}
-                // onMouseLeave={uploadInterval}
+                onMouseEnter={uploadInterval}
+                onMouseLeave={uploadInterval}
                 >
 
             {spinner}
