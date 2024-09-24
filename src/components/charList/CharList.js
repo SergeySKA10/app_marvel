@@ -2,11 +2,118 @@
 import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 
-import MarvelService from '../../services/MarvelService';
+import useMarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 
 import './charList.scss';
+
+
+const CharList = (props) => {
+    const [chars, setChars] = useState([]),
+          [offset, setOffset] = useState(0),
+          [newItemsLoading, setNewItemsLoading] = useState(false),
+          [charEnded, setCharEnded] = useState(false),
+          {loading, error, getAllCharacters, clearError} = useMarvelService();
+
+    useEffect(() => {
+       uploadCharList(true);
+    }, []);
+
+    // функция обновления списка героев
+    const uploadCharList = (initial) => {
+        clearError();
+        
+        //условие для корректного включения Spinner при первичной загрузке героев
+        initial ? setNewItemsLoading(false) : setNewItemsLoading(true);
+
+        getAllCharacters(offset)
+            .then(onLoadedChars);
+    }
+
+    
+    // функция изменения состония chars, newItemLoading, offset, ended
+    const onLoadedChars = (newChars) => {
+        let ended = false;
+
+        if (newChars.length < 9) {
+            ended = true;
+        } 
+
+        setChars(chars => [...chars, ...newChars]);
+        setCharEnded(ended);
+        setNewItemsLoading(newItemsLoading => false);
+        setOffset(offset => offset + 9);
+    }
+
+    // создание ref 
+    const myRef = useRef([]);
+
+    // функция фокуса и добавления класса активности выбранному элементу
+    const onFocus = (i) => {
+        myRef.current[i].focus();
+        myRef.current.forEach(el => el.classList.remove('char__item_selected'));
+        myRef.current[i].classList.add('char__item_selected'); 
+    }
+
+    // функция формирования списка
+    const _createCharList = (data) => {
+        return data.map((el, i) => {
+            const stylePichureHero = el.thumbnail.includes('image_not_available') ? {objectFit: 'contain'} : null;
+
+            return (
+                <li 
+                    ref={el => myRef.current[i] = el} // с помощью "callback Ref" происходит добавление элементов в массив myRef
+                    className="char__item" 
+                    key={el.id} 
+                    tabIndex={0} 
+                    onClick={() => {
+                        props.onCharSelected(el.id); 
+                        onFocus(i)
+                    }}
+                    onKeyDown={(e) => {
+                        if (e.key === ' ' || e.key === "Enter") {
+                            props.onCharSelected(el.id); 
+                            onFocus(i)
+                        }
+                    }}>
+
+                    <img src={el.thumbnail} alt={el.description} style={stylePichureHero}/>
+                    <div className="char__name">{el.name}</div>
+
+                </li>
+            );
+        });
+    }
+
+    const spinner = loading && !newItemsLoading ? <Spinner/> : null;
+    const errorMessage = error ? <ErrorMessage/> : null;
+    const items = _createCharList(chars);
+
+    return (
+        <div className="char__list">
+            <ul className="char__grid">
+                {spinner}
+                {errorMessage}
+                {items}
+            </ul>
+            <button className="button button__main button__long"
+                    disabled={newItemsLoading}
+                    style={{'display': charEnded ? 'none' : null}}>
+                <div className="inner" onClick={() => {uploadCharList(false)}}>load more</div>
+            </button>
+        </div>
+    )
+ 
+}
+
+CharList.propTypes = {
+    onCharSelected: PropTypes.func
+}
+
+export default CharList;
+
+
 
 // export default class CharList extends Component {
 //     charsRef = [];
@@ -137,119 +244,5 @@ import './charList.scss';
 // }
 
 
-const CharList = (props) => {
-    const [chars, setChars] = useState([]),
-          [loading, setLoading] = useState(true),
-          [error, setError] = useState(false),
-          [offset, setOffset] = useState(0),
-          [newItemsLoading, setNewItemsLoading] = useState(false),
-          [charEnded, setCharEnded] = useState(false);
-
-    useEffect(() => {
-       uploadCharList();
-       console.log('effect loading chars'); 
-    }, []);
-
-    // функция изменения состония chars and loading
-    const onLoadedChars = (newChars) => {
-        let ended = false;
-
-        if (newChars.length < 9) {
-            ended = true;
-        } 
-
-        setChars(chars => [...chars, ...newChars]);
-        setLoading(false);
-        setCharEnded(ended);
-        setNewItemsLoading(newItemsLoading => false);
-        setOffset(offset => offset + 9);
-        setError(false)
-    }
-
-    // функция по изменению состояния newItemsLoading при загрузке
-    const onCharListLoading = () => {
-        setNewItemsLoading(true);
-    }
-
-    // функция изменения состония при ошибке
-    const onError = () => {
-        setLoading(false);
-        setError(true);
-    }
-
-    // функция обновления списка героев
-    const uploadCharList = () => {
-        const marvelService = new MarvelService(offset);
-
-        onCharListLoading();
-
-        marvelService.getAllCharacters()
-                     .then(onLoadedChars)
-                     .catch(onError);
-    }
-
-    // создание ref 
-    const myRef = useRef([]);
-
-    // функция фокуса и добавления класса активности выбранному элементу
-    const onFocus = (i) => {
-        myRef.current[i].focus();
-        myRef.current.forEach(el => el.classList.remove('char__item_selected'));
-        myRef.current[i].classList.add('char__item_selected'); 
-    }
-
-    // функция формирования списка
-    const _createCharList = (data) => {
-        return data.map((el, i) => {
-            const stylePichureHero = el.thumbnail.includes('image_not_available') ? {objectFit: 'contain'} : null;
-
-            return (
-                <li 
-                    ref={el => myRef.current[i] = el} // с помощью "callback Ref" происходит добавление элементов в массив myRef
-                    className="char__item" 
-                    key={el.id} 
-                    tabIndex={0} 
-                    onClick={() => {
-                        props.onCharSelected(el.id); 
-                        onFocus(i)
-                    }}
-                    onKeyDown={(e) => {
-                        if (e.key === ' ' || e.key === "Enter") {
-                            props.onCharSelected(el.id); 
-                            onFocus(i)
-                        }
-                    }}>
-
-                    <img src={el.thumbnail} alt={el.description} style={stylePichureHero}/>
-                    <div className="char__name">{el.name}</div>
-
-                </li>
-            );
-        });
-    }
-
-
-    return (
-        <div className="char__list">
-            <ul className="char__grid" style={loading || error ? {gridTemplateColumns: 'repeat(1, 650px)'} : null}>
-                {loading ? <Spinner/> : null}
-                {error ? <ErrorMessage/> : null}
-                {!(loading || error) ? _createCharList(chars): null}
-            </ul>
-            <button className="button button__main button__long"
-                    disabled={newItemsLoading}
-                    style={{'display': charEnded ? 'none' : null}}>
-                <div className="inner" onClick={uploadCharList}>load more</div>
-            </button>
-        </div>
-    )
- 
-}
-
-CharList.propTypes = {
-    onCharSelected: PropTypes.func
-}
-
-export default CharList;
 
 

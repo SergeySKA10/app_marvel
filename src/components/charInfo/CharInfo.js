@@ -2,12 +2,106 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
-import MarvelService from '../../services/MarvelService';
+import useMarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 import Skeleton from '../skeleton/Skeleton';
 
 import './charInfo.scss';
+
+const CharInfo = (props) => {
+    const [char, setChar] = useState(null),
+          [comics, setCommics] = useState(null),
+          {loading, error, clearError, getCharacter, getComics} = useMarvelService();
+
+    useEffect(() => {
+        uploadCharInfo();
+    }, [props.charId]);
+
+    // функция обновления char, comics and loading после получения данных с сервера
+    const onCharLoaded = (newChar) => {
+        getComics(props.charId)
+            .then(newComics => {
+                setChar(char => newChar);
+                setCommics(comics => newComics.slice(0, 10));
+            });
+         
+    }
+
+    // функция по получению описания героя из списка
+    const uploadCharInfo = () => {
+        if (!props.charId) {
+            return
+        }
+
+        clearError();
+
+        getCharacter(props.charId)
+            .then(onCharLoaded);      
+    }
+    
+
+    return (
+        <div className="char__info">
+            {loading || error || char || comics ? null :  <Skeleton/>}
+            {loading ? <Spinner/> : null}
+            {error ? <ErrorMessage/> : null}
+            {!(loading || error || !char || !comics ) ? <ContentView char={char} comics={comics}/> : null}
+        </div>
+    )
+}
+
+CharInfo.propTypes = {
+    charId: PropTypes.number
+}
+
+const ContentView = (props) => {
+    const {name, description, thumbnail, homepage, wiki} = props.char,
+          stylePichureHero = thumbnail.includes('image_not_available') ? {objectFit: 'contain'} : null;
+
+    const comicsList = props.comics.length === 0 ? 
+                            'К сожалению комиксы с данным героем отсутствуют':
+                            props.comics.map((el, i) => {
+                                return (
+                                    <li className="char__comics-item" key={i}>
+                                        <a href={el.url}>{el.name}</a>
+                                    </li>
+                                );
+                            });
+
+    return (
+        <>
+            <div className="char__basics">
+                <img src={thumbnail} alt={name} style={stylePichureHero}/>
+                <div>
+                    <div className="char__info-name">{name}</div>
+                    <div className="char__btns">
+                        <a href={homepage} className="button button__main">
+                            <div className="inner">homepage</div>
+                        </a>
+                        <a href={wiki} className="button button__secondary">
+                            <div className="inner">Wiki</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div className="char__descr">
+                {description}
+            </div>
+            <div className="char__comics">Comics:</div>
+            <ul className="char__comics-list">
+                {comicsList}
+            </ul>
+        </>
+    );
+}
+
+ContentView.propTypes = {
+    comics: PropTypes.array
+}
+
+export default CharInfo;
+
 
 // export default class CharInfo extends Component {
 //     state = {
@@ -95,117 +189,3 @@ import './charInfo.scss';
 //         );
 //     }
 // }
-
-const CharInfo = (props) => {
-    const [char, setChar] = useState(null),
-          [comics, setCommics] = useState(null),
-          [loading, setLoading] = useState(false),
-          [error, setError] =  useState(false);
-
-    // переменная по созданию запросов
-    const marvelService = new MarvelService();
-
-    useEffect(() => {
-        console.log('upload char Info')
-        uploadCharInfo();
-    }, [props.charId]);
-
-    // функция обновления char, comics and loading после получения данных с сервера
-    const onCharLoaded = (newChar) => {
-        marvelService
-            .getComics(props.charId)
-            .then(newComics => {
-                setChar(char => newChar);
-                setCommics(comics => newComics.slice(0, 10));
-                setLoading(loading => false);
-                setError(error => false);
-            })
-            .catch(onError);
-         
-    }
-
-    // функция обновления state.error при ошибке запроса
-    const onError = () => {
-        setError(error => true);
-    }
-
-    // функция по показу спинера между загрузками
-    const onCharLoading = () => {
-        setLoading(loading => true);
-    }
-
-    // функция по получению описания героя из списка
-    const uploadCharInfo = () => {
-        if (!props.charId) {
-            return
-        }
-        
-        onCharLoading();
-
-        marvelService
-            .getCharacter(props.charId)
-            .then(onCharLoaded)
-            .catch(onError);      
-    }
-    
-
-    return (
-        <div className="char__info">
-            {loading || error || char || comics ? null :  <Skeleton/>}
-            {loading ? <Spinner/> : null}
-            {error ? <ErrorMessage/> : null}
-            {!(loading || error || !char || !comics ) ? <ContentView char={char} comics={comics}/> : null}
-        </div>
-    )
-}
-
-CharInfo.propTypes = {
-    charId: PropTypes.number
-}
-
-const ContentView = (props) => {
-    const {name, description, thumbnail, homepage, wiki} = props.char,
-          stylePichureHero = thumbnail.includes('image_not_available') ? {objectFit: 'contain'} : null;
-
-    const comicsList = props.comics.length === 0 ? 
-                            'К сожалению комиксы с данным героем отсутствуют':
-                            props.comics.map((el, i) => {
-                                return (
-                                    <li className="char__comics-item" key={i}>
-                                        <a href={el.url}>{el.name}</a>
-                                    </li>
-                                );
-                            });
-
-    return (
-        <>
-            <div className="char__basics">
-                <img src={thumbnail} alt={name} style={stylePichureHero}/>
-                <div>
-                    <div className="char__info-name">{name}</div>
-                    <div className="char__btns">
-                        <a href={homepage} className="button button__main">
-                            <div className="inner">homepage</div>
-                        </a>
-                        <a href={wiki} className="button button__secondary">
-                            <div className="inner">Wiki</div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div className="char__descr">
-                {description}
-            </div>
-            <div className="char__comics">Comics:</div>
-            <ul className="char__comics-list">
-                {comicsList}
-            </ul>
-        </>
-    );
-}
-
-ContentView.propTypes = {
-    comics: PropTypes.array
-}
-
-export default CharInfo;
