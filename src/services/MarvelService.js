@@ -9,10 +9,10 @@ const useMarvelService = () => {
 
     const _apiBase = 'https://gateway.marvel.com:443/v1/public/'; // строка постоянного адреса для запросов
 
-    // функция по получению comics
-    const getComics = async (id) => {
+    // функция по получению comics героя
+    const getComicsChar = async (id) => {
         const res = await request(`${_apiBase}characters/${id}/comics?apikey=${_apiKey}`);
-        return res.data.results.map(_transformComics);
+        return res.data.results.map(_transformComicsChar);
     }
 
     // функция по получению нескольких героев (9шт)
@@ -27,15 +27,21 @@ const useMarvelService = () => {
         return _transformCharacter(res.data.results[0]);
     }
 
-    // функция - трансформатор данных - выборка нужных данных для последующей работы
-    const _transformComics = (data) => {
+    // функция по получению комиксов
+    const getAllComics = async (offset) => {
+        const res = await request(`${_apiBase}comics?limit=8&offset=${offset}&apikey=${_apiKey}`);
+        return res.data.results.map(_transformComics);
+    }
+
+    // функция - трансформатор данных - получение комиксов героя
+    const _transformComicsChar = (data) => {
         return {
             name: data.title,
             url: data.urls[0].url
         }
     }
 
-    // функция - трансформатор данных - выборка нужных данных для последующей работы 
+    // функция - трансформатор данных - получение данных о герое 
     const _transformCharacter = (data) => {
         return {
             id: data.id,
@@ -51,14 +57,26 @@ const useMarvelService = () => {
             wiki: data.urls[1].url
         }
     }
+
+    // функция - трансформатор данных, получение данных о комиксе
+    const _transformComics = (data) => {
+        return {
+            id: data.id,
+            name: data.title,
+            thumbnail: `${data.thumbnail.path}.${data.thumbnail.extension}`,
+            url: data.urls[0].url,
+            price: data.prices[0].price ? data.prices[0].price : 'NOT AVAILABLE'
+        }
+    }
     
     return {
         loading,
         error,
         getAllCharacters,
         getCharacter,
-        getComics,
-        clearError
+        getComicsChar,
+        clearError,
+        getAllComics
     }
 }
 

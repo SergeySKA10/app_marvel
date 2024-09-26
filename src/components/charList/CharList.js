@@ -88,11 +88,12 @@ const CharList = (props) => {
 
     const spinner = loading && !newItemsLoading ? <Spinner/> : null;
     const errorMessage = error ? <ErrorMessage/> : null;
+    const styleWrapper = (loading && !newItemsLoading) || error ? {gridTemplateColumns: 'repeat(1, 650px)'} : null;
     const items = _createCharList(chars);
 
     return (
         <div className="char__list">
-            <ul className="char__grid">
+            <ul className="char__grid" style={styleWrapper}>
                 {spinner}
                 {errorMessage}
                 {items}

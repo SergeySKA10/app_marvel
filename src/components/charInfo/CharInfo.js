@@ -12,7 +12,7 @@ import './charInfo.scss';
 const CharInfo = (props) => {
     const [char, setChar] = useState(null),
           [comics, setCommics] = useState(null),
-          {loading, error, clearError, getCharacter, getComics} = useMarvelService();
+          {loading, error, clearError, getCharacter, getComicsChar} = useMarvelService();
 
     useEffect(() => {
         uploadCharInfo();
@@ -20,7 +20,7 @@ const CharInfo = (props) => {
 
     // функция обновления char, comics and loading после получения данных с сервера
     const onCharLoaded = (newChar) => {
-        getComics(props.charId)
+        getComicsChar(props.charId)
             .then(newComics => {
                 setChar(char => newChar);
                 setCommics(comics => newComics.slice(0, 10));
