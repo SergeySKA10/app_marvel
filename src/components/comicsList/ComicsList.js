@@ -53,7 +53,7 @@ const ComicsList = () => {
 
     const errorMessage = error ? <ErrorMessage/> : null;
     const spinner = loading && !newItemLoading ? <Spinner/> : null;
-    const styleWrapper = loading && !newItemLoading ? {gridTemplateColumns: 'repeat(1, auto)', 'justify-content': 'space-around'} : null;
+    const styleWrapper = loading && !newItemLoading ? {gridTemplateColumns: 'repeat(1, auto)', justifyContent: 'space-around'} : null;
     const list = createListComics(comics);
     const styleBtn = comicsEnded ? {display: 'none'} : null;
 
