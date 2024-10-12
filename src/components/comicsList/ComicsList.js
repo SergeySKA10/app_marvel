@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import useMarvelService from '../../services/MarvelService';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 import Spinner from '../spinner/Spinner';
@@ -41,11 +42,11 @@ const ComicsList = () => {
             const styleImg = el.thumbnail.includes('not_available') ? {objectFit: 'contain'} : null;
             return (
                 <li key={el.id} className="comics__item">
-                    <a href={el.url}>
+                    <Link to={`${el.id}`}>
                         <img src={el.thumbnail} alt={`${el.name} url: ${el.thumbnail}`} className="comics__item-img" style={styleImg}/>
                         <div className="comics__item-name">{el.name}</div>
                         <div className="comics__item-price">{el.price}</div>
-                    </a>
+                    </Link>
                 </li>
             );
         });

@@ -10,15 +10,18 @@ import './charList.scss';
 
 
 const CharList = (props) => {
-    const [chars, setChars] = useState([]),
-          [offset, setOffset] = useState(0),
+    const [chars, setChars] = useState(localStorage.getItem('charsList') ? JSON.parse(localStorage.getItem('charsList')) : []),
+          [offset, setOffset] = useState(localStorage.getItem('offsetCharsList') ? localStorage.getItem('offsetCharsList') : 0),
           [newItemsLoading, setNewItemsLoading] = useState(false),
           [charEnded, setCharEnded] = useState(false),
           {loading, error, getAllCharacters, clearError} = useMarvelService();
 
     useEffect(() => {
-       uploadCharList(true);
+        if (!localStorage.getItem('charsList')) {
+            uploadCharList(true);
+        } 
     }, []);
+    
 
     // функция обновления списка героев
     const uploadCharList = (initial) => {
@@ -41,9 +44,11 @@ const CharList = (props) => {
         } 
 
         setChars(chars => [...chars, ...newChars]);
+        localStorage.setItem('charsList', JSON.stringify([...chars, ...newChars]));
         setCharEnded(ended);
         setNewItemsLoading(newItemsLoading => false);
         setOffset(offset => offset + 9);
+        localStorage.setItem('offsetCharsList', +offset + 9);
     }
 
     // создание ref 
@@ -86,9 +91,22 @@ const CharList = (props) => {
         });
     }
 
+    // отчиска localStorage и возвращение на изначальные состояния
+    const onClearList = () => {
+        localStorage.removeItem('charsList');
+        localStorage.removeItem('offsetCharsList');
+        setChars(chars => []);
+        setOffset(offset => 0);
+        console.log(myRef);
+    }
+
     const spinner = loading && !newItemsLoading ? <Spinner/> : null;
-    const errorMessage = error ? <ErrorMessage/> : null;
-    const styleWrapper = (loading && !newItemsLoading) || error ? {gridTemplateColumns: 'repeat(1, 650px)'} : null;
+    const errorMessage = error ? 
+        <div style={{textAlign: 'center'}}>
+            <ErrorMessage/>
+        </div>
+        : null;
+    const styleWrapper = (loading && !newItemsLoading) ? {gridTemplateColumns: 'repeat(1, 650px)'} : null;
     const items = _createCharList(chars);
 
     return (
@@ -98,11 +116,22 @@ const CharList = (props) => {
                 {errorMessage}
                 {items}
             </ul>
-            <button className="button button__main button__long"
-                    disabled={newItemsLoading}
-                    style={{'display': charEnded ? 'none' : null}}>
-                <div className="inner" onClick={() => {uploadCharList(false)}}>load more</div>
-            </button>
+            <div style={{display: 'flex'}}>
+                <button className="button button__main button__long"
+                        disabled={newItemsLoading}
+                        style={{'display': charEnded ? 'none' : null}}>
+                    <div className="inner" onClick={() => {uploadCharList(false)}}>load more</div>
+                </button>
+                <button className="button button__main button__long"
+                        disabled={newItemsLoading}>
+                    <div className="inner" onClick={() => {
+                            onClearList();
+                        }}>
+                            Clear list
+                    </div>
+                </button>
+            </div>
+            
         </div>
     )
  

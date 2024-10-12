@@ -27,10 +27,15 @@ const useMarvelService = () => {
         return _transformCharacter(res.data.results[0]);
     }
 
-    // функция по получению комиксов
+    // функция по получению комикса
     const getAllComics = async (offset) => {
         const res = await request(`${_apiBase}comics?limit=8&offset=${offset}&apikey=${_apiKey}`);
         return res.data.results.map(_transformComics);
+    }
+
+    const getComic = async (id) => {
+        const res = await request(`${_apiBase}comics/${id}?apikey=${_apiKey}`);
+        return _transformComics(res.data.results[0]);
     }
 
     // функция - трансформатор данных - получение комиксов героя
@@ -63,6 +68,10 @@ const useMarvelService = () => {
         return {
             id: data.id,
             name: data.title,
+            description: !data.description || data.description === '#N/A' ? "К сожалению, описание комикса отсутствует" : 
+                          data.description.length > 300 ? `${data.description.slice(0, 300)}...` : data.description,
+            pageCount: data.pageCount,
+            language: data.textObjects.length === 0 ? '' : data.textObjects[0].language ? data.textObjects[0].language : 'not specified',
             thumbnail: `${data.thumbnail.path}.${data.thumbnail.extension}`,
             url: data.urls[0].url,
             price: data.prices[0].price ? data.prices[0].price : 'NOT AVAILABLE'
@@ -76,7 +85,8 @@ const useMarvelService = () => {
         getCharacter,
         getComicsChar,
         clearError,
-        getAllComics
+        getAllComics,
+        getComic
     }
 }
 

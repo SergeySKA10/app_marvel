@@ -45,7 +45,11 @@ const CharInfo = (props) => {
         <div className="char__info">
             {loading || error || char || comics ? null :  <Skeleton/>}
             {loading ? <Spinner/> : null}
-            {error ? <ErrorMessage/> : null}
+            {error ? 
+                <div style={{textAlign: 'center'}}>
+                    <ErrorMessage/>
+                </div>
+                : null}
             {!(loading || error || !char || !comics ) ? <ContentView char={char} comics={comics}/> : null}
         </div>
     )
@@ -56,8 +60,8 @@ CharInfo.propTypes = {
 }
 
 const ContentView = (props) => {
-    const {name, description, thumbnail, homepage, wiki} = props.char,
-          stylePichureHero = thumbnail.includes('image_not_available') ? {objectFit: 'contain'} : null;
+    const {name, description, thumbnail, homepage, wiki} = props.char;
+        //   stylePichureHero = thumbnail.includes('image_not_available') ? {objectFit: 'contain'} : null;
 
     const comicsList = props.comics.length === 0 ? 
                             'К сожалению комиксы с данным героем отсутствуют':
@@ -72,7 +76,7 @@ const ContentView = (props) => {
     return (
         <>
             <div className="char__basics">
-                <img src={thumbnail} alt={name} style={stylePichureHero}/>
+                <img src={thumbnail} alt={name}/>
                 <div>
                     <div className="char__info-name">{name}</div>
                     <div className="char__btns">

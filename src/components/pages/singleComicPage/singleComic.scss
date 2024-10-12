@@ -1,4 +1,4 @@
-@import '../../style/variables.scss';
+@import '../../../style/variables.scss';
 
 .single-comic {
     margin-top: 50px;
@@ -7,8 +7,9 @@
     column-gap: 50px;
     align-items: start;
     &__img {
-        width: 293px;
-        height: 450px;
+        max-width: 293px;
+        max-height: 450px;
+        border-radius: 10px;
     }
     &__name {
         font-weight: bold;

@@ -55,7 +55,11 @@ const RandomChar = (props) => {
     };
 
     const spinner = loading ? <Loading/> : null,
-          errorMessage = error ? <ErrorMessage/> : null,
+          errorMessage = error ?
+            <div style={{textAlign: 'center', marginTop: '30px'}}>
+                <ErrorMessage/>
+            </div>
+            : null,
           content = !(loading || error || !char) ? <View char={char}/> : null;
 
     return (
@@ -98,11 +102,11 @@ const Loading = () => {
 // компонент отображаемого контента в случае успешного получения данных с сервера
 const View = ({char}) => {
     const {name, description, thumbnail, homepage, wiki} = char;
-    const stylePichureHero = thumbnail.includes('image_not_available') ? {objectFit: 'contain'} : null;
+    // const stylePichureHero = thumbnail.includes('image_not_available') ? {objectFit: 'contain'} : null;
 
     return (
         <div className="randomchar__block">
-            <img src={thumbnail} alt="Random character" className="randomchar__img" style={stylePichureHero}/>
+            <img src={thumbnail} alt="Random character" className="randomchar__img"/>
             <div className="randomchar__info">
                 <p className="randomchar__name">{name}</p>
                 <p className="randomchar__descr">
