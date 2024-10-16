@@ -24,8 +24,10 @@ const RandomChar = (props) => {
         // условия запуска или отчиски таймера
         if (timer) {
             clearInterval(timerId); 
+            console.log('clear timer')
         } else {
-            timerId = setInterval(() => getRandomChar, 60000);
+            timerId = setInterval(getRandomChar, 60000);
+            console.log('timer start')
         }
 
         return () => clearInterval(timerId);
@@ -102,7 +104,6 @@ const Loading = () => {
 // компонент отображаемого контента в случае успешного получения данных с сервера
 const View = ({char}) => {
     const {name, description, thumbnail, homepage, wiki} = char;
-    // const stylePichureHero = thumbnail.includes('image_not_available') ? {objectFit: 'contain'} : null;
 
     return (
         <div className="randomchar__block">
@@ -110,7 +111,7 @@ const View = ({char}) => {
             <div className="randomchar__info">
                 <p className="randomchar__name">{name}</p>
                 <p className="randomchar__descr">
-                    {description}
+                    {description.length > 60 ? `${description.slice(0, 60)}...` : description}
                 </p>
                 <div className="randomchar__btns">
                     <a href={homepage} className="button button__main">

@@ -90,7 +90,7 @@ const ContentView = (props) => {
                 </div>
             </div>
             <div className="char__descr">
-                {description}
+                {description.length > 60 ? `${description.slice(0, 60)}...` : description}
             </div>
             <div className="char__comics">Comics:</div>
             <ul className="char__comics-list">

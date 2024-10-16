@@ -1,40 +1,19 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import useMarvelService from '../../../services/MarvelService';
-import Spinner from '../../spinner/Spinner';
-import ErrorMessage from '../../errorMessage/ErrorMessage';
+import { Link } from 'react-router-dom';
 
-import './singleComic.scss';
+import withSinglePage from '../../hoc/withSinglePage';
+import Spinner from '../spinner/Spinner';
+import ErrorMessage from '../errorMessage/ErrorMessage';
 
-const SingleComicPage = () => {
-    const [comic, setComic] = useState(null),
-          {loading, error, getComic, clearError} = useMarvelService(),
-          id = useParams();
-
-    useEffect(() => {
-        updateComic(id.comicsId);
-    }, [id]);
-
-    const updateComic = (id) => {
-        clearError();
-
-        getComic(id)
-            .then(onLoadedComic);
-    }
-
-    const onLoadedComic = (newComic) => {
-        setComic(comic => newComic);
-    }
-
-    const spinner = loading ? <Spinner/> : null,
-          errorMessage = error ? 
+const SingleComicPage = (props) => {
+    const spinner = props.loading ? <Spinner/> : null,
+          errorMessage = props.error ? 
             <div style={{textAlign: 'center'}}>
                 <ErrorMessage/>
-                <p style={{marginBottom: '10px'}}>{`Возможно комикса с id: ${id.comicsId} не существует`}</p>
+                <p style={{marginBottom: '10px'}}>{`Возможно комикса с id: ${props.id.comicsId} не существует`}</p>
                 <Link to="../.." className="single-comic__back">Вернуться на главную</Link>
             </div>
             : null,
-          content = !(loading || error || !comic)  ? <Comic comic={comic}/> : null,
+          content = !(props.loading || props.error || !props.data)  ? <Comic data={props.data}/> : null,
           styleComicWrapper = errorMessage ? {gridTemplateColumns: 'auto'} : null
 
     return (
@@ -53,9 +32,8 @@ const SingleComicPage = () => {
     )
 }
 
-const Comic = ({comic}) => {
-    const {name, description, pageCount, language, price, thumbnail, url} = comic;
-    // const stylePichureHero = thumbnail.includes('image_not_available') ? {objectFit: 'contain'} : null;
+const Comic = ({data}) => {
+    const {name, description, pageCount, language, price, thumbnail, url} = data;
 
     return (
         <>
@@ -72,4 +50,6 @@ const Comic = ({comic}) => {
     );
 }
 
-export default SingleComicPage;
+const ComicsPageWithSinglePage = withSinglePage(SingleComicPage, 'comic');
+
+export default ComicsPageWithSinglePage;

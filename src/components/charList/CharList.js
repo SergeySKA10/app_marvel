@@ -1,6 +1,7 @@
 //import { Component } from 'react';
 import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 import useMarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/Spinner';
@@ -11,16 +12,27 @@ import './charList.scss';
 
 const CharList = (props) => {
     const [chars, setChars] = useState(localStorage.getItem('charsList') ? JSON.parse(localStorage.getItem('charsList')) : []),
-          [offset, setOffset] = useState(localStorage.getItem('offsetCharsList') ? localStorage.getItem('offsetCharsList') : 0),
-          [newItemsLoading, setNewItemsLoading] = useState(false),
-          [charEnded, setCharEnded] = useState(false),
-          {loading, error, getAllCharacters, clearError} = useMarvelService();
+          [offset, setOffset] = useState(localStorage.getItem('offsetCharsList') ? +localStorage.getItem('offsetCharsList') : 0),
+          [newItemsLoading, setNewItemsLoading] = useState(false), // стейт для установки disabled на триггеры
+          [charEnded, setCharEnded] = useState(false), // стейт для установки конца списка героев
+          {loading, error, getAllCharacters, clearError} = useMarvelService(),
+          [inProp, setInProp] = useState(false); // стейт для анимации
+        //   [pressBtn, setPressBtn] = useState(false); // стейт для кнопки отчиски списка
 
     useEffect(() => {
+        
+        console.log(myRef.current)
+
         if (!localStorage.getItem('charsList')) {
+            console.log('yes')
             uploadCharList(true);
-        } 
-    }, []);
+        } else {
+            // console.log(offset, 'offset');
+            // console.log(localStorage.getItem('offsetCharsList'));
+            uploadCharList(false);
+        }
+
+    }, [offset]);
     
 
     // функция обновления списка героев
@@ -35,7 +47,7 @@ const CharList = (props) => {
     }
 
     
-    // функция изменения состония chars, newItemLoading, offset, ended
+    // функция изменения состония chars, newItemLoading, ended
     const onLoadedChars = (newChars) => {
         let ended = false;
 
@@ -47,7 +59,6 @@ const CharList = (props) => {
         localStorage.setItem('charsList', JSON.stringify([...chars, ...newChars]));
         setCharEnded(ended);
         setNewItemsLoading(newItemsLoading => false);
-        setOffset(offset => offset + 9);
         localStorage.setItem('offsetCharsList', +offset + 9);
     }
 
@@ -63,70 +74,82 @@ const CharList = (props) => {
 
     // функция формирования списка
     const _createCharList = (data) => {
-        return data.map((el, i) => {
-            const stylePichureHero = el.thumbnail.includes('image_not_available') ? {objectFit: 'contain'} : null;
+        // return data.map((el, i) => {
+            // const stylePichureHero = el.thumbnail.includes('image_not_available') ? {objectFit: 'contain'} : null;
 
             return (
-                <li 
-                    ref={el => myRef.current[i] = el} // с помощью "callback Ref" происходит добавление элементов в массив myRef
-                    className="char__item" 
-                    key={el.id} 
-                    tabIndex={0} 
-                    onClick={() => {
-                        props.onCharSelected(el.id); 
-                        onFocus(i)
-                    }}
-                    onKeyDown={(e) => {
-                        if (e.key === ' ' || e.key === "Enter") {
-                            props.onCharSelected(el.id); 
-                            onFocus(i)
-                        }
-                    }}>
+                <TransitionGroup className='char__grid' component='ul'>
+                    {data.map((el, i) => (
+                        <CSSTransition in={inProp} timeout={500} classNames='list-chars'>
+                            <li 
+                                ref={el => myRef.current[i] = el} // с помощью "callback Ref" происходит добавление элементов в массив myRef
+                                className="char__item" 
+                                key={el.id} 
+                                tabIndex={0} 
+                                onClick={() => {
+                                    props.onCharSelected(el.id); 
+                                    onFocus(i)
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === ' ' || e.key === "Enter") {
+                                        props.onCharSelected(el.id); 
+                                        onFocus(i)
+                                    }
+                                }}>
 
-                    <img src={el.thumbnail} alt={el.description} style={stylePichureHero}/>
-                    <div className="char__name">{el.name}</div>
+                                <img src={el.thumbnail} alt={el.description} style={el.thumbnail.includes('image_not_available') ? {objectFit: 'contain'} : null}/>
+                                <div className="char__name">{el.name}</div>
 
-                </li>
+                            </li>
+                        </CSSTransition>
+                    ))}
+                </TransitionGroup>
+
+
             );
-        });
+        // });
     }
 
     // отчиска localStorage и возвращение на изначальные состояния
     const onClearList = () => {
+        if (offset === 0) {
+            uploadCharList(true);
+        }
         localStorage.removeItem('charsList');
         localStorage.removeItem('offsetCharsList');
         setChars(chars => []);
-        setOffset(offset => 0);
-        console.log(myRef);
+        setOffset(0);
+        myRef.current.length = 0;
     }
 
+    // отображение контента
     const spinner = loading && !newItemsLoading ? <Spinner/> : null;
     const errorMessage = error ? 
         <div style={{textAlign: 'center'}}>
             <ErrorMessage/>
         </div>
         : null;
-    const styleWrapper = (loading && !newItemsLoading) ? {gridTemplateColumns: 'repeat(1, 650px)'} : null;
     const items = _createCharList(chars);
 
     return (
         <div className="char__list">
-            <ul className="char__grid" style={styleWrapper}>
-                {spinner}
-                {errorMessage}
-                {items}
-            </ul>
+            {spinner}
+            {errorMessage}
+            {items}
             <div style={{display: 'flex'}}>
                 <button className="button button__main button__long"
                         disabled={newItemsLoading}
-                        style={{'display': charEnded ? 'none' : null}}>
-                    <div className="inner" onClick={() => {uploadCharList(false)}}>load more</div>
+                        style={{'display': charEnded ? 'none' : null}}
+                        onClick={() => {
+                            setOffset(offset => offset + 9);
+                            setInProp(true);
+                        }}>
+                    <div className="inner">load more</div>
                 </button>
                 <button className="button button__main button__long"
-                        disabled={newItemsLoading}>
-                    <div className="inner" onClick={() => {
-                            onClearList();
-                        }}>
+                        disabled={newItemsLoading}
+                        onClick={() => onClearList()}>
+                    <div className="inner">
                             Clear list
                     </div>
                 </button>

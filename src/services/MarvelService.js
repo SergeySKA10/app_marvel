@@ -21,9 +21,16 @@ const useMarvelService = () => {
         return res.data.results.map(_transformCharacter);
     }
 
-    // функция по полчению одного героя
+    // функция по полчению одного героя по id 
     const getCharacter = async (id) => {
         const res = await request(`${_apiBase}characters/${id}?apikey=${_apiKey}`);
+        return _transformCharacter(res.data.results[0]);
+    }
+
+    // функция получения героя по имени
+
+    const getCharacterName = async (name) => {
+        const res = await request(`${_apiBase}characters?name=${name}&apikey=${_apiKey}`);
         return _transformCharacter(res.data.results[0]);
     }
 
@@ -53,9 +60,8 @@ const useMarvelService = () => {
             name: data.name ? data.name : 'Герой не найден',
 
             description: !data.description ? 
-                            'К сожалению, описание героя отсутствует': 
-                            data.description.length > 60 ? 
-                                    `${data.description.slice(0, 60)}...` : data.description,
+                            'К сожалению, описание героя отсутствует' 
+                            : data.description,
 
             thumbnail: `${data.thumbnail.path}.${data.thumbnail.extension}`,
             homepage: data.urls[0].url,
@@ -83,6 +89,7 @@ const useMarvelService = () => {
         error,
         getAllCharacters,
         getCharacter,
+        getCharacterName,
         getComicsChar,
         clearError,
         getAllComics,
