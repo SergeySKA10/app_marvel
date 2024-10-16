@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { Helmet } from "react-helmet";
 
 import useMarvelService from "../services/MarvelService";
 import AppBanner from "../components/appBanner/AppBanner";
@@ -38,7 +39,13 @@ const withSinglePage = (BaseComponent, initial) => {
         };
 
         return (
-            <>
+            <>  
+                <Helmet>
+                    <meta
+                        name='description'
+                        content={`${initial} page`}/>
+                    <title>{`${initial} page`}</title>
+                </Helmet>
                 <AppBanner/>
                 <BaseComponent
                     {...props}
