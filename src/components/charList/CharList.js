@@ -20,9 +20,6 @@ const CharList = (props) => {
           [pressBtn, setPressBtn] = useState(false); // стейт для определения нажатия кнопуи обновления списка
 
     useEffect(() => {
-        
-        console.log(myRef.current)
-
         if (!localStorage.getItem('charsList')) {
             uploadCharList(true);
         } else if (pressBtn) {
@@ -65,7 +62,11 @@ const CharList = (props) => {
     // функция фокуса и добавления класса активности выбранному элементу
     const onFocus = (i) => {
         myRef.current[i].focus();
-        myRef.current.forEach(el => el.classList.remove('char__item_selected'));
+        myRef.current.forEach(el => {
+            if (el) {
+                el.classList.remove('char__item_selected');
+            }
+        });
         myRef.current[i].classList.add('char__item_selected'); 
     }
 
@@ -116,7 +117,7 @@ const CharList = (props) => {
         localStorage.removeItem('offsetCharsList');
         setChars(chars => []);
         setOffset(0);
-        myRef.current.length = 0;
+        //myRef.current.length = 0;
     }
 
     // отображение контента

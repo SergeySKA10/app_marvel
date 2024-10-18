@@ -13,15 +13,16 @@ const ComicsList = () => {
           [newItemLoading, setNewItemsLoading] = useState(false),
           [comicsEnded, setComicsEnded] = useState(false),
           { loading, error, getAllComics, clearError} = useMarvelService(),
-          [inProp, setInProp] = useState(false); // стейт для анимации
+          [inProp, setInProp] = useState(false), // стейт для анимации
+          [pressBtn, setPressBtn] = useState(false); // стейт для определения нажатия кнопуи обновления списка
 
     useEffect(() => {
         if (!localStorage.getItem('comicsList')) {
             uploadComics(true);
-        } else {
+        } else if (pressBtn) {
             uploadComics(false);
-        }
-        
+            setPressBtn(false);
+        } 
     }, [offset]);
 
     const uploadComics = (initial) => {
@@ -93,6 +94,7 @@ const ComicsList = () => {
                         disabled={newItemLoading}
                         onClick={() => {
                             setOffset(offset => offset + 8);
+                            setPressBtn(true);
                             setInProp(true);
                         }}>
                     <div className="inner">load more</div>
