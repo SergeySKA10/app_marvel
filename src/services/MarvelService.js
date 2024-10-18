@@ -31,7 +31,9 @@ const useMarvelService = () => {
 
     const getCharacterName = async (name) => {
         const res = await request(`${_apiBase}characters?name=${name}&apikey=${_apiKey}`);
-        return _transformCharacter(res.data.results[0]);
+        // if (res.data.results[0].length === 0) return null;
+
+        return res.data.results.map(_transformCharacter);
     }
 
     // функция по получению комикса

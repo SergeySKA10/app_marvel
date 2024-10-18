@@ -16,22 +16,19 @@ const CharList = (props) => {
           [newItemsLoading, setNewItemsLoading] = useState(false), // стейт для установки disabled на триггеры
           [charEnded, setCharEnded] = useState(false), // стейт для установки конца списка героев
           {loading, error, getAllCharacters, clearError} = useMarvelService(),
-          [inProp, setInProp] = useState(false); // стейт для анимации
-        //   [pressBtn, setPressBtn] = useState(false); // стейт для кнопки отчиски списка
+          [inProp, setInProp] = useState(false), // стейт для анимации
+          [pressBtn, setPressBtn] = useState(false); // стейт для определения нажатия кнопуи обновления списка
 
     useEffect(() => {
         
         console.log(myRef.current)
 
         if (!localStorage.getItem('charsList')) {
-            console.log('yes')
             uploadCharList(true);
-        } else {
-            // console.log(offset, 'offset');
-            // console.log(localStorage.getItem('offsetCharsList'));
+        } else if (pressBtn) {
             uploadCharList(false);
+            setPressBtn(false);
         }
-
     }, [offset]);
     
 
@@ -142,6 +139,7 @@ const CharList = (props) => {
                         style={{'display': charEnded ? 'none' : null}}
                         onClick={() => {
                             setOffset(offset => offset + 9);
+                            setPressBtn(true);
                             setInProp(true);
                         }}>
                     <div className="inner">load more</div>

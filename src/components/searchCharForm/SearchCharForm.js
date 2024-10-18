@@ -15,7 +15,8 @@ const SearchCharForm = () => {
     const uploadChar = (name) => {
         getCharacterName(name)
             .then(data => {
-                setHerou(data.name);
+                console.log(data);
+                setHerou(data[0].name);
             })
             .catch(error => setHerou(`${name} не существует`));
     }
@@ -59,7 +60,7 @@ const SearchCharForm = () => {
                                 :
                                 <div style={{display: 'flex', marginTop: '20px'}}>
                                     <div className="char__search-success">{`Герой ${herou} найден, открыть карточку героя?`}</div>
-                                    <Link to={`${herou}`}>
+                                    <Link to={`characters/${herou}`}>
                                         <button 
                                             type='submit' 
                                             className="button button__secondary">

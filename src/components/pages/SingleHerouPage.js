@@ -6,15 +6,15 @@ import ErrorMessage from '../errorMessage/ErrorMessage';
 
 const SingleHerouPage = (props) => {
     const spinner = props.loading ? <Spinner/> : null,
-          errorMessage = props.error ? 
+          errorMessage = props.error || (props.data.length === 0 && !props.loading) ? 
             <div style={{textAlign: 'center'}}>
                 <ErrorMessage/>
-                <p style={{marginBottom: '10px'}}>{`Возможно героя с id: ${props.id.herou} не существует`}</p>
+                <p style={{marginBottom: '10px'}}>{`Возможно героя под именем: ${props.id.herouId} не существует`}</p>
                 <Link to=".." className="single-comic__back">Вернуться на главную</Link>
             </div>
             : null,
-          content = !(props.loading || props.error || !props.data)  ? <Herou data={props.data}/> : null,
-          styleComicWrapper = errorMessage ? {gridTemplateColumns: 'auto'} : null
+          content = !(props.loading || props.error || props.data.length === 0)  ? <Herou data={props.data}/> : null,
+          styleComicWrapper = errorMessage ? {gridTemplateColumns: 'auto'} : null;
 
     return (
     <div className="single-comic" style={styleComicWrapper}>
@@ -33,7 +33,7 @@ const SingleHerouPage = (props) => {
 }
 
 const Herou = ({data}) => {
-    const {name, description, thumbnail} = data;
+    const {name, description, thumbnail} = data[0];
 
     return (
         <>
