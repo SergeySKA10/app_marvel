@@ -5,7 +5,7 @@ const _api = process.env.REACT_APP_MY_API_KEY; // api ключ
 // изменяем MarvelService для его совместной работы с useHttp
 const useMarvelService = () => {
     const _apiKey = _api,
-    { loading, request, error, clearError } = useHttp();
+    { loading, request, error, clearError, process, setProcess } = useHttp();
 
     const _apiBase = 'https://gateway.marvel.com:443/v1/public/'; // строка постоянного адреса для запросов
 
@@ -95,7 +95,9 @@ const useMarvelService = () => {
         getComicsChar,
         clearError,
         getAllComics,
-        getComic
+        getComic,
+        process,
+        setProcess
     }
 }
 

@@ -3,16 +3,13 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 import useMarvelService from '../../services/MarvelService';
-import Spinner from '../spinner/Spinner';
-import ErrorMessage from '../errorMessage/ErrorMessage';
-import Skeleton from '../skeleton/Skeleton';
+import setContent from '../../utils/setContent';
 
 import './charInfo.scss';
 
 const CharInfo = (props) => {
-    const [char, setChar] = useState(null),
-          [comics, setCommics] = useState(null),
-          {loading, error, clearError, getCharacter, getComicsChar} = useMarvelService();
+    const [data, setData] = useState(null),
+          {clearError, getCharacter, getComicsChar, process, setProcess} = useMarvelService();
 
     useEffect(() => {
         uploadCharInfo();
@@ -22,10 +19,9 @@ const CharInfo = (props) => {
     const onCharLoaded = (newChar) => {
         getComicsChar(props.charId)
             .then(newComics => {
-                setChar(char => newChar);
-                setCommics(comics => newComics.slice(0, 10));
-            });
-         
+                setData(data => ({...newChar, comics: [...newComics.slice(0, 10)]}));
+            })
+            .then(() => setProcess('confirmed'));
     }
 
     // функция по получению описания героя из списка
@@ -37,20 +33,12 @@ const CharInfo = (props) => {
         clearError();
 
         getCharacter(props.charId)
-            .then(onCharLoaded);      
+            .then(onCharLoaded);     
     }
     
-
     return (
         <div className="char__info">
-            {loading || error || char || comics ? null :  <Skeleton/>}
-            {loading ? <Spinner/> : null}
-            {error ? 
-                <div style={{textAlign: 'center'}}>
-                    <ErrorMessage/>
-                </div>
-                : null}
-            {!(loading || error || !char || !comics ) ? <ContentView char={char} comics={comics}/> : null}
+            {setContent(process, data, ContentView)}
         </div>
     )
 }
@@ -60,12 +48,12 @@ CharInfo.propTypes = {
 }
 
 const ContentView = (props) => {
-    const {name, description, thumbnail, homepage, wiki} = props.char;
-        //   stylePichureHero = thumbnail.includes('image_not_available') ? {objectFit: 'contain'} : null;
+    console.log(props);
+    const {name, description, thumbnail, homepage, wiki, comics} = props.data;
 
-    const comicsList = props.comics.length === 0 ? 
+    const comicsList = comics.length === 0 ? 
                             'К сожалению комиксы с данным героем отсутствуют':
-                            props.comics.map((el, i) => {
+                            comics.map((el, i) => {
                                 return (
                                     <li className="char__comics-item" key={i}>
                                         <a href={el.url}>{el.name}</a>

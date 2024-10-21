@@ -5,11 +5,13 @@ import { useState, useCallback } from "react";
 export const useHttp = () => {
     // изначальное состояние загрузки и ошибки
     const [loading, setLoading] = useState(false),
-          [error, setError] = useState(null);
+          [error, setError] = useState(null),
+          [process, setProcess] = useState('waiting'); // состояние действий (проессов) в приложении
 
     // запрос на сервер, используем usecallback для хеширования функции
     const request = useCallback(async (url, method = "GET", body = null, headers = {'Content-Type': 'application/json'}) => {
         setLoading(true); // изменение состояния загрузки - спиннер между загрузками
+        setProcess('loading');
 
         // используем try catch чтобы поймать ошибку
         try {
@@ -28,6 +30,7 @@ export const useHttp = () => {
         } catch (e) {
             setLoading(false); // изменение состояния загрузки
             setError(e.message); // изменение состояния ошибки
+            setProcess('error')
             throw e
         }
 
@@ -36,12 +39,15 @@ export const useHttp = () => {
     // функция отчиски ошибки 
     const clearError = useCallback(() => {
         setError(null);
+        setProcess('loading');
     }, []);
 
     return {
         loading,
         error,
         request,
-        clearError
+        clearError,
+        process,
+        setProcess
     }
 };
