@@ -1,33 +1,12 @@
-import { Link } from 'react-router-dom';
-
 import withSinglePage from '../../hoc/withSinglePage';
-import Spinner from '../spinner/Spinner';
-import ErrorMessage from '../errorMessage/ErrorMessage';
+import setContent from '../../utils/setContent';
 
 const SingleHerouPage = (props) => {
-    const spinner = props.loading ? <Spinner/> : null,
-          errorMessage = props.error || (props.data.length === 0 && !props.loading) ? 
-            <div style={{textAlign: 'center'}}>
-                <ErrorMessage/>
-                <p style={{marginBottom: '10px'}}>{`Возможно героя под именем: ${props.id.herouId} не существует`}</p>
-                <Link to=".." className="single-comic__back">Вернуться на главную</Link>
-            </div>
-            : null,
-          content = !(props.loading || props.error || props.data.length === 0)  ? <Herou data={props.data}/> : null,
-          styleComicWrapper = errorMessage ? {gridTemplateColumns: 'auto'} : null;
+    const styleComicWrapper = props.process === "error" || props.process === "loading" ? {gridTemplateColumns: 'auto'} : null;
 
     return (
     <div className="single-comic" style={styleComicWrapper}>
-        {spinner}
-        {errorMessage}
-        {content}
-
-        {
-            !errorMessage ? 
-            <Link to=".." className="single-comic__back">Back to main</Link>
-            : null
-        }
-        
+        { setContent(props.process, props.data, Herou, false, {single: 'herou'}) } 
     </div>
     )
 }

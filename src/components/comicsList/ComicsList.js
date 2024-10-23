@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
+
 import useMarvelService from '../../services/MarvelService';
-import ErrorMessage from '../errorMessage/ErrorMessage';
-import Spinner from '../spinner/Spinner';
+import { setList } from '../../utils/setContent';
 
 import './comicsList.scss';
 
@@ -12,7 +12,7 @@ const ComicsList = () => {
           [offset, setOffset] = useState(localStorage.getItem('offsetComicsList') ? +localStorage.getItem('offsetComicsList') : 0),
           [newItemLoading, setNewItemsLoading] = useState(false),
           [comicsEnded, setComicsEnded] = useState(false),
-          { loading, error, getAllComics, clearError} = useMarvelService(),
+          {getAllComics, clearError, process, setProcess} = useMarvelService(),
           [inProp, setInProp] = useState(false), // стейт для анимации
           [pressBtn, setPressBtn] = useState(false); // стейт для определения нажатия кнопуи обновления списка
 
@@ -31,7 +31,8 @@ const ComicsList = () => {
         initial ? setNewItemsLoading(false) : setNewItemsLoading(true);
 
         getAllComics(offset)
-            .then(onLoadedComics);
+            .then(onLoadedComics)
+            .then(() => setProcess('confirmed'));
     }
 
     const onLoadedComics = (newComics) => {
@@ -78,16 +79,13 @@ const ComicsList = () => {
         setOffset(0);
     }
 
-    const errorMessage = error ? <ErrorMessage/> : null;
-    const spinner = loading && !newItemLoading ? <Spinner/> : null;
-    const list = createListComics(comics);
     const styleBtn = comicsEnded ? {display: 'none'} : null;
 
     return (
         <div className="comics__list">
-            {errorMessage}
-            {spinner}
-            {list}
+
+            { setList(process, () => createListComics(comics), newItemLoading) }
+
             <div style={{display: 'flex'}}>
                 <button className="button button__main button__long"
                         style={styleBtn}

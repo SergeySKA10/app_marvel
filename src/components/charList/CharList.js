@@ -1,23 +1,22 @@
-//import { Component } from 'react';
-import { useState, useEffect, useRef } from 'react';
+
+import { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 import useMarvelService from '../../services/MarvelService';
-import Spinner from '../spinner/Spinner';
-import ErrorMessage from '../errorMessage/ErrorMessage';
+import { setList } from '../../utils/setContent';
 
 import './charList.scss';
 
 
 const CharList = (props) => {
     const [chars, setChars] = useState(localStorage.getItem('charsList') ? JSON.parse(localStorage.getItem('charsList')) : []),
+          [pressBtn, setPressBtn] = useState(false), // стейт для определения нажатия кнопуи обновления списка
           [offset, setOffset] = useState(localStorage.getItem('offsetCharsList') ? +localStorage.getItem('offsetCharsList') : 0),
           [newItemsLoading, setNewItemsLoading] = useState(false), // стейт для установки disabled на триггеры
           [charEnded, setCharEnded] = useState(false), // стейт для установки конца списка героев
-          {loading, error, getAllCharacters, clearError} = useMarvelService(),
-          [inProp, setInProp] = useState(false), // стейт для анимации
-          [pressBtn, setPressBtn] = useState(false); // стейт для определения нажатия кнопуи обновления списка
+          {getAllCharacters, clearError, process, setProcess} = useMarvelService(),
+          [inProp, setInProp] = useState(false); // стейт для анимации
 
     useEffect(() => {
         if (!localStorage.getItem('charsList')) {
@@ -37,7 +36,8 @@ const CharList = (props) => {
         initial ? setNewItemsLoading(false) : setNewItemsLoading(true);
 
         getAllCharacters(offset)
-            .then(onLoadedChars);
+            .then(onLoadedChars)
+            .then(() => setProcess('confirmed'));
     }
 
     
@@ -72,9 +72,6 @@ const CharList = (props) => {
 
     // функция формирования списка
     const _createCharList = (data) => {
-        // return data.map((el, i) => {
-            // const stylePichureHero = el.thumbnail.includes('image_not_available') ? {objectFit: 'contain'} : null;
-
             return (
                 <TransitionGroup className='char__grid' component='ul'>
                     {data.map((el, i) => (
@@ -105,7 +102,6 @@ const CharList = (props) => {
 
 
             );
-        // });
     }
 
     // отчиска localStorage и возвращение на изначальные состояния
@@ -117,23 +113,17 @@ const CharList = (props) => {
         localStorage.removeItem('offsetCharsList');
         setChars(chars => []);
         setOffset(0);
-        //myRef.current.length = 0;
     }
 
-    // отображение контента
-    const spinner = loading && !newItemsLoading ? <Spinner/> : null;
-    const errorMessage = error ? 
-        <div style={{textAlign: 'center'}}>
-            <ErrorMessage/>
-        </div>
-        : null;
-    const items = _createCharList(chars);
+    const elements = useMemo(() => {
+        return () =>_createCharList(chars)
+    }, [chars]);
 
     return (
         <div className="char__list">
-            {spinner}
-            {errorMessage}
-            {items}
+
+            {setList(process, elements, newItemsLoading)}
+            
             <div style={{display: 'flex'}}>
                 <button className="button button__main button__long"
                         disabled={newItemsLoading}

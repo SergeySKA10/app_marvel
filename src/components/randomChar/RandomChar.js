@@ -1,17 +1,16 @@
 //import { Component } from 'react';
 import { useState, useEffect } from 'react';
 
-import Spinner from '../spinner/Spinner';
-import ErrorMessage from '../errorMessage/ErrorMessage';
+import setContent from '../../utils/setContent';
 import useMarvelService from '../../services/MarvelService';
 
 import './randomChar.scss';
 import mjolnir from '../../resources/img/mjolnir.png';
 
-const RandomChar = (props) => {
+const RandomChar = () => {
     const [char, setChar] = useState(null),
           [timer, setTimer] = useState(false),
-          { loading, error, getCharacter, clearError} = useMarvelService();
+          { getCharacter, clearError, process, setProcess} = useMarvelService();
 
     useEffect(() => {
         //первичное получение данных для отображения рандомного героя
@@ -39,7 +38,8 @@ const RandomChar = (props) => {
         const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011000);
 
         getCharacter(id)
-            .then(onCharLoaded);
+            .then(onCharLoaded)
+            .then(() => setProcess('confirmed'));
     };
 
     // функция обновления state.char после получения данных с сервера
@@ -56,24 +56,14 @@ const RandomChar = (props) => {
         }
     };
 
-    const spinner = loading ? <Loading/> : null,
-          errorMessage = error ?
-            <div style={{textAlign: 'center', marginTop: '30px'}}>
-                <ErrorMessage/>
-            </div>
-            : null,
-          content = !(loading || error || !char) ? <View char={char}/> : null;
-
     return (
         <div className="randomchar"
                 onMouseEnter={uploadInterval}
                 onMouseLeave={uploadInterval}
                 >
-
-            {spinner}
-            {errorMessage}
-            {content}
-
+            <div className="randomchar__block">
+                {setContent(process, char, View)}
+            </div>
             <div className="randomchar__static">
                 <p className="randomchar__title">
                     Random character for today!<br/>
@@ -91,22 +81,12 @@ const RandomChar = (props) => {
     );
 }
 
-// компонент загрузочного экрана (спиннер)
-const Loading = () => {
-    return (
-        <div className="randomchar__block">
-            <Spinner/>
-            <p style={{color: '#9F0013', textAlign: 'center', alignContent: 'center'}}>Загрузка информации о Герое</p>
-        </div>
-    )
-}
-
 // компонент отображаемого контента в случае успешного получения данных с сервера
-const View = ({char}) => {
-    const {name, description, thumbnail, homepage, wiki} = char;
+const View = ({data}) => {
+    const {name, description, thumbnail, homepage, wiki} = data;
 
     return (
-        <div className="randomchar__block">
+        <>
             <img src={thumbnail} alt="Random character" className="randomchar__img"/>
             <div className="randomchar__info">
                 <p className="randomchar__name">{name}</p>
@@ -122,7 +102,7 @@ const View = ({char}) => {
                     </a>
                 </div>
             </div>
-        </div>
+        </>
     );
 }
 

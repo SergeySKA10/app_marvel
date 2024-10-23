@@ -10,7 +10,7 @@ import './singleComic.scss';
 const withSinglePage = (BaseComponent, initial) => {
     return (props) => {
         const [data, setData] = useState([]),
-              {loading, error, getComic, getCharacterName, clearError} = useMarvelService(),
+              {getComic, getCharacterName, clearError, process, setProcess} = useMarvelService(),
               id = useParams();
 
         useEffect(() => {
@@ -24,10 +24,19 @@ const withSinglePage = (BaseComponent, initial) => {
                 case 'comic':
                     getComic(id.comicsId)
                         .then(onLoadedData)
+                        .then(() => setProcess('confirmed'));
                     break;
                 case 'herou':
                     getCharacterName(id.herouId)
-                        .then(onLoadedData)
+                        .then(data => {
+                            if (data.length === 0) {
+                                setProcess('error');
+                                throw new Error('staus 404');
+                            } else {
+                                onLoadedData(data);
+                            }
+                            })
+                        .then(() => setProcess('confirmed'));
                     break;
                 default:
                     throw new Error(`${initial} not found`);
@@ -51,8 +60,7 @@ const withSinglePage = (BaseComponent, initial) => {
                     {...props}
                     id={id}
                     data={data}
-                    loading={loading}
-                    error={error}/>
+                    process={process}/>
             </>
         ); 
     }

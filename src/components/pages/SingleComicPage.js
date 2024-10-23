@@ -1,33 +1,12 @@
-import { Link } from 'react-router-dom';
-
 import withSinglePage from '../../hoc/withSinglePage';
-import Spinner from '../spinner/Spinner';
-import ErrorMessage from '../errorMessage/ErrorMessage';
+import setContent from '../../utils/setContent';
 
 const SingleComicPage = (props) => {
-    const spinner = props.loading ? <Spinner/> : null,
-          errorMessage = props.error ? 
-            <div style={{textAlign: 'center'}}>
-                <ErrorMessage/>
-                <p style={{marginBottom: '10px'}}>{`Возможно комикса с id: ${props.id.comicsId} не существует`}</p>
-                <Link to="../.." className="single-comic__back">Вернуться на главную</Link>
-            </div>
-            : null,
-          content = !(props.loading || props.error || !props.data)  ? <Comic data={props.data}/> : null,
-          styleComicWrapper = errorMessage ? {gridTemplateColumns: 'auto'} : null
+    const styleComicWrapper = props.process === "error" || props.process === "loading" ? {gridTemplateColumns: 'auto'} : null
 
     return (
         <div className="single-comic" style={styleComicWrapper}>
-            {spinner}
-            {errorMessage}
-            {content}
-
-            {
-                !errorMessage ? 
-                <Link to=".." className="single-comic__back">Back to comics</Link>
-                : null
-            }
-            
+            {setContent(props.process, props.data, Comic, false, {single: 'comic'})}
         </div>
     )
 }
