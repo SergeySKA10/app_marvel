@@ -1,60 +1,17 @@
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
-import useMarvelService from '../../services/MarvelService';
+import { useList } from '../../hooks/list.hook';
 import { setList } from '../../utils/setContent';
 
 import './charList.scss';
 
 
 const CharList = (props) => {
-    const [chars, setChars] = useState(localStorage.getItem('charsList') ? JSON.parse(localStorage.getItem('charsList')) : []),
-          [pressBtn, setPressBtn] = useState(false), // стейт для определения нажатия кнопуи обновления списка
-          [offset, setOffset] = useState(localStorage.getItem('offsetCharsList') ? +localStorage.getItem('offsetCharsList') : 0),
-          [newItemsLoading, setNewItemsLoading] = useState(false), // стейт для установки disabled на триггеры
-          [charEnded, setCharEnded] = useState(false), // стейт для установки конца списка героев
-          {getAllCharacters, clearError, process, setProcess} = useMarvelService(),
-          [inProp, setInProp] = useState(false); // стейт для анимации
-
-    useEffect(() => {
-        if (!localStorage.getItem('charsList')) {
-            uploadCharList(true);
-        } else if (pressBtn) {
-            uploadCharList(false);
-            setPressBtn(false);
-        }
-    }, [offset]);
-    
-
-    // функция обновления списка героев
-    const uploadCharList = (initial) => {
-        clearError();
-        
-        //условие для корректного включения Spinner при первичной загрузке героев
-        initial ? setNewItemsLoading(false) : setNewItemsLoading(true);
-
-        getAllCharacters(offset)
-            .then(onLoadedChars)
-            .then(() => setProcess('confirmed'));
-    }
-
-    
-    // функция изменения состония chars, newItemLoading, ended
-    const onLoadedChars = (newChars) => {
-        let ended = false;
-
-        if (newChars.length < 9) {
-            ended = true;
-        } 
-
-        setChars(chars => [...chars, ...newChars]);
-        localStorage.setItem('charsList', JSON.stringify([...chars, ...newChars]));
-        setCharEnded(ended);
-        setNewItemsLoading(newItemsLoading => false);
-        localStorage.setItem('offsetCharsList', +offset + 9);
-    }
+    const [inProp, setInProp] = useState(false); // стейт для анимации
+    const {data, setOffset, setPressBtn, newItemsLoading, dataEnded, onClearList, process} = useList('charsList', 'offsetCharsList', 9);
 
     // создание ref 
     const myRef = useRef([]);
@@ -99,25 +56,12 @@ const CharList = (props) => {
                         </CSSTransition>
                     ))}
                 </TransitionGroup>
-
-
             );
     }
 
-    // отчиска localStorage и возвращение на изначальные состояния
-    const onClearList = () => {
-        if (offset === 0) {
-            uploadCharList(true);
-        }
-        localStorage.removeItem('charsList');
-        localStorage.removeItem('offsetCharsList');
-        setChars(chars => []);
-        setOffset(0);
-    }
-
     const elements = useMemo(() => {
-        return () =>_createCharList(chars)
-    }, [chars]);
+        return () =>_createCharList(data)
+    }, [data]);
 
     return (
         <div className="char__list">
@@ -127,7 +71,7 @@ const CharList = (props) => {
             <div style={{display: 'flex'}}>
                 <button className="button button__main button__long"
                         disabled={newItemsLoading}
-                        style={{'display': charEnded ? 'none' : null}}
+                        style={{'display': dataEnded ? 'none' : null}}
                         onClick={() => {
                             setOffset(offset => offset + 9);
                             setPressBtn(true);

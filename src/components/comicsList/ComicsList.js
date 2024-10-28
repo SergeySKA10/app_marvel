@@ -1,51 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
-
-import useMarvelService from '../../services/MarvelService';
+import { useList } from '../../hooks/list.hook';
 import { setList } from '../../utils/setContent';
 
 import './comicsList.scss';
 
 const ComicsList = () => {
-    const [comics, setComics] = useState(localStorage.getItem('comicsList') ? JSON.parse(localStorage.getItem('comicsList')) : []),
-          [offset, setOffset] = useState(localStorage.getItem('offsetComicsList') ? +localStorage.getItem('offsetComicsList') : 0),
-          [newItemLoading, setNewItemsLoading] = useState(false),
-          [comicsEnded, setComicsEnded] = useState(false),
-          {getAllComics, clearError, process, setProcess} = useMarvelService(),
-          [inProp, setInProp] = useState(false), // стейт для анимации
-          [pressBtn, setPressBtn] = useState(false); // стейт для определения нажатия кнопуи обновления списка
-
-    useEffect(() => {
-        if (!localStorage.getItem('comicsList')) {
-            uploadComics(true);
-        } else if (pressBtn) {
-            uploadComics(false);
-            setPressBtn(false);
-        } 
-    }, [offset]);
-
-    const uploadComics = (initial) => {
-        clearError();
-
-        initial ? setNewItemsLoading(false) : setNewItemsLoading(true);
-
-        getAllComics(offset)
-            .then(onLoadedComics)
-            .then(() => setProcess('confirmed'));
-    }
-
-    const onLoadedComics = (newComics) => {
-        let ended;
-
-        if (newComics.length < 8) ended = true;
-
-        setComics(comics => [...comics, ...newComics]);
-        localStorage.setItem('comicsList', JSON.stringify([...comics, ...newComics]));
-        setNewItemsLoading(false);
-        setComicsEnded(ended);
-        localStorage.setItem('offsetComicsList', +offset + 8);
-    }
+    const       [inProp, setInProp] = useState(false); // стейт для анимации
+    const {data, setOffset, setPressBtn, newItemsLoading, dataEnded, onClearList, process} = useList('comicsList', 'offsetComicsList', 8);
 
     const createListComics = (data) => {
         return (
@@ -68,28 +31,17 @@ const ComicsList = () => {
         );   
     };
 
-       // отчиска localStorage и возвращение на изначальные состояния
-       const onClearList = () => {
-        if (offset === 0) {
-            uploadComics(true);
-        }
-        localStorage.removeItem('comicsList');
-        localStorage.removeItem('offsetComicsList');
-        setComics(comics => []);
-        setOffset(0);
-    }
-
-    const styleBtn = comicsEnded ? {display: 'none'} : null;
+    const styleBtn = dataEnded ? {display: 'none'} : null;
 
     return (
         <div className="comics__list">
 
-            { setList(process, () => createListComics(comics), newItemLoading) }
+            { setList(process, () => createListComics(data), newItemsLoading) }
 
             <div style={{display: 'flex'}}>
                 <button className="button button__main button__long"
                         style={styleBtn}
-                        disabled={newItemLoading}
+                        disabled={newItemsLoading}
                         onClick={() => {
                             setOffset(offset => offset + 8);
                             setPressBtn(true);
@@ -98,7 +50,7 @@ const ComicsList = () => {
                     <div className="inner">load more</div>
                 </button>
                 <button className="button button__main button__long"
-                        disabled={newItemLoading}
+                        disabled={newItemsLoading}
                         onClick={() => onClearList()}>
                     <div className="inner">
                             Clear list
