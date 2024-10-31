@@ -44,21 +44,3 @@
         color: #fff;
     }
 }
-
-.list-chars-enter {
-    opacity: 0;
-}
-.list-chars-enter-active {
-    opacity: 1;
-    transition: opacity 1000ms;
-}
-.list-chars-enter-done {
-    opacity: 1;
-}
-.list-chars-exit {
-    opacity: 1;
-}
-.list-chars-exit-active {
-    opacity: 0;
-    transition: opacity 500ms;
-}

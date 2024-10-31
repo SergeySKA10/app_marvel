@@ -1,7 +1,5 @@
-
-import { useState, useRef, useMemo } from 'react';
+import { useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 import { useList } from '../../hooks/list.hook';
 import { setList } from '../../utils/setContent';
@@ -9,9 +7,8 @@ import { setList } from '../../utils/setContent';
 import './charList.scss';
 
 
-const CharList = (props) => {
-    const [inProp, setInProp] = useState(false); // стейт для анимации
-    const {data, setOffset, setPressBtn, newItemsLoading, dataEnded, onClearList, process} = useList('charsList', 'offsetCharsList', 9);
+const CharList = (props) => { 
+    const {chars, setOffsetChars, setPressBtnChars, newItemsLoading, dataEnded, onClearList, process} = useList();
 
     // создание ref 
     const myRef = useRef([]);
@@ -29,39 +26,37 @@ const CharList = (props) => {
 
     // функция формирования списка
     const _createCharList = (data) => {
-            return (
-                <TransitionGroup className='char__grid' component='ul'>
-                    {data.map((el, i) => (
-                        <CSSTransition in={inProp} timeout={500} classNames='list-chars'>
-                            <li 
-                                ref={el => myRef.current[i] = el} // с помощью "callback Ref" происходит добавление элементов в массив myRef
-                                className="char__item" 
-                                key={el.id} 
-                                tabIndex={0} 
-                                onClick={() => {
-                                    props.onCharSelected(el.id); 
-                                    onFocus(i)
-                                }}
-                                onKeyDown={(e) => {
-                                    if (e.key === ' ' || e.key === "Enter") {
-                                        props.onCharSelected(el.id); 
-                                        onFocus(i)
-                                    }
-                                }}>
+        return (
+            <ul className='char__grid'>
+                {data.map((el, i) => (
+                    <li 
+                        ref={el => myRef.current[i] = el} // с помощью "callback Ref" происходит добавление элементов в массив myRef
+                        className="char__item" 
+                        key={el.id} 
+                        tabIndex={0} 
+                        onClick={() => {
+                            props.onCharSelected(el.id); 
+                            onFocus(i)
+                        }}
+                        onKeyDown={(e) => {
+                            if (e.key === ' ' || e.key === "Enter") {
+                                props.onCharSelected(el.id); 
+                                onFocus(i)
+                            }
+                        }}>
 
-                                <img src={el.thumbnail} alt={el.description} style={el.thumbnail.includes('image_not_available') ? {objectFit: 'contain'} : null}/>
-                                <div className="char__name">{el.name}</div>
+                        <img src={el.thumbnail} alt={el.description} style={el.thumbnail.includes('image_not_available') ? {objectFit: 'contain'} : null}/>
+                        <div className="char__name">{el.name}</div>
 
-                            </li>
-                        </CSSTransition>
-                    ))}
-                </TransitionGroup>
-            );
-    }
+                    </li>
+                ))}
+            </ul>
+        );
+    };
 
     const elements = useMemo(() => {
-        return () =>_createCharList(data)
-    }, [data]);
+        return () =>_createCharList(chars);
+    }, [chars]);
 
     return (
         <div className="char__list">
@@ -71,17 +66,16 @@ const CharList = (props) => {
             <div style={{display: 'flex'}}>
                 <button className="button button__main button__long"
                         disabled={newItemsLoading}
-                        style={{'display': dataEnded ? 'none' : null}}
+                        style={{'display': dataEnded.chars ? 'none' : null}}
                         onClick={() => {
-                            setOffset(offset => offset + 9);
-                            setPressBtn(true);
-                            setInProp(true);
+                            setOffsetChars(offsetChars => offsetChars + 9);
+                            setPressBtnChars(true);
                         }}>
                     <div className="inner">load more</div>
                 </button>
                 <button className="button button__main button__long"
                         disabled={newItemsLoading}
-                        onClick={() => onClearList()}>
+                        onClick={() => onClearList('chars')}>
                     <div className="inner">
                             Clear list
                     </div>
