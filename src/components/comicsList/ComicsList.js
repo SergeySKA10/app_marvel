@@ -1,22 +1,19 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { useList } from '../../hooks/list.hook';
 import { setList } from '../../utils/setContent';
 
 import './comicsList.scss';
 
 const ComicsList = () => {
-    const       [inProp, setInProp] = useState(false); // стейт для анимации
-    const {data, setOffset, setPressBtn, newItemsLoading, dataEnded, onClearList, process} = useList('comicsList', 'offsetComicsList', 8);
+    const {data, offset, setOffset, setPressBtn, newItemsLoading, dataEnded, onClearList, process} = useList('comicsList', 'offsetComicsList', 8);
 
     const createListComics = (data) => {
         return (
-            <TransitionGroup className='comics__grid' component='ul'>
+            <ul className='comics__grid'>
                 {data.map(el => {
                     const styleImg = el.thumbnail.includes('not_available') ? {objectFit: 'contain'} : null;
                     return (
-                        <CSSTransition  in={inProp} timeout={1000} classNames='list-comics'>
+                        
                             <li key={el.id} className="comics__item">
                                 <Link to={`${el.id}`}>
                                     <img src={el.thumbnail} alt={`${el.name} url: ${el.thumbnail}`} className="comics__item-img" style={styleImg}/>
@@ -24,10 +21,10 @@ const ComicsList = () => {
                                     <div className="comics__item-price">{el.price}</div>
                                 </Link>
                             </li>
-                        </CSSTransition> 
+                        
                     );
                 })}
-            </TransitionGroup>
+            </ul>
         );   
     };
 
@@ -44,8 +41,8 @@ const ComicsList = () => {
                         disabled={newItemsLoading}
                         onClick={() => {
                             setOffset(offset => offset + 8);
+                            localStorage.setItem('offsetComicsList', +offset + 8);
                             setPressBtn(true);
-                            setInProp(true);
                         }}>
                     <div className="inner">load more</div>
                 </button>

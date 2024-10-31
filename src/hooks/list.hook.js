@@ -59,7 +59,6 @@ export const useList = (storageDataName, storageOffsetName, step) => {
         localStorage.setItem(storageDataName, JSON.stringify([...data, ...newData]));
         setDataEnded(ended);
         setNewItemsLoading(newItemsLoading => false);
-        localStorage.setItem(storageOffsetName, +offset + step);
     }
 
     // отчиска localStorage и возвращение на изначальные состояния
@@ -75,6 +74,7 @@ export const useList = (storageDataName, storageOffsetName, step) => {
 
     return {
         data,
+        offset,
         setOffset,
         setPressBtn,
         newItemsLoading,

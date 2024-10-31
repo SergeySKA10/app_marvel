@@ -36,21 +36,3 @@
         }
     }
 }
-
-.list-comics-enter {
-    opacity: 0;
-}
-.list-comics-enter-active {
-    opacity: 1;
-    transition: opacity 1000ms;
-}
-.list-comics-enter-done {
-    opacity: 1;
-}
-.list-comics-exit {
-    opacity: 1;
-}
-.list-comics-exit-active {
-    opacity: 0;
-    transition: opacity 500ms;
-}

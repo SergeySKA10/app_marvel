@@ -1,7 +1,6 @@
 
-import { useState, useRef, useMemo } from 'react';
+import { useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 import { useList } from '../../hooks/list.hook';
 import { setList } from '../../utils/setContent';
@@ -10,8 +9,7 @@ import './charList.scss';
 
 
 const CharList = (props) => {
-    const [inProp, setInProp] = useState(false); // стейт для анимации
-    const {data, setOffset, setPressBtn, newItemsLoading, dataEnded, onClearList, process} = useList('charsList', 'offsetCharsList', 9);
+    const {data, offset, setOffset, setPressBtn, newItemsLoading, dataEnded, onClearList, process} = useList('charsList', 'offsetCharsList', 9);
 
     // создание ref 
     const myRef = useRef([]);
@@ -30,9 +28,9 @@ const CharList = (props) => {
     // функция формирования списка
     const _createCharList = (data) => {
             return (
-                <TransitionGroup className='char__grid' component='ul'>
+                <ul className='char__grid'>
                     {data.map((el, i) => (
-                        <CSSTransition in={inProp} timeout={500} classNames='list-chars'>
+                        
                             <li 
                                 ref={el => myRef.current[i] = el} // с помощью "callback Ref" происходит добавление элементов в массив myRef
                                 className="char__item" 
@@ -53,9 +51,9 @@ const CharList = (props) => {
                                 <div className="char__name">{el.name}</div>
 
                             </li>
-                        </CSSTransition>
+                       
                     ))}
-                </TransitionGroup>
+                </ul>
             );
     }
 
@@ -74,8 +72,8 @@ const CharList = (props) => {
                         style={{'display': dataEnded ? 'none' : null}}
                         onClick={() => {
                             setOffset(offset => offset + 9);
+                            localStorage.setItem('offsetCharsList', +offset + 9);
                             setPressBtn(true);
-                            setInProp(true);
                         }}>
                     <div className="inner">load more</div>
                 </button>
