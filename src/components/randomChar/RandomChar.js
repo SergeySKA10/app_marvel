@@ -23,10 +23,8 @@ const RandomChar = () => {
         // условия запуска или отчиски таймера
         if (timer) {
             clearInterval(timerId); 
-            console.log('clear timer')
         } else {
             timerId = setInterval(getRandomChar, 60000);
-            console.log('timer start')
         }
 
         return () => clearInterval(timerId);
@@ -56,12 +54,14 @@ const RandomChar = () => {
         }
     };
 
+    const styleWrapper = process === "error" || process === "loading" ? {gridTemplateColumns: 'auto'} : null;
+
     return (
         <div className="randomchar"
                 onMouseEnter={uploadInterval}
                 onMouseLeave={uploadInterval}
                 >
-            <div className="randomchar__block">
+            <div className="randomchar__block" style={styleWrapper}>
                 {setContent(process, char, View)}
             </div>
             <div className="randomchar__static">

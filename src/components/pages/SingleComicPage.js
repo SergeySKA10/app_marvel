@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import withSinglePage from '../../hoc/withSinglePage';
 import setContent from '../../utils/setContent';
 
@@ -24,6 +25,7 @@ const Comic = ({data}) => {
                 <p className="single-comic__descr">Language: {language}</p>
                 <div className="single-comic__price">{price}$</div>
                 <a href={url} style={{marginTop: '15px', color: '#9F0013'}}>Узнать подробнее...</a>
+                <Link to=".." className='single-comic__back'>Вернуться назад</Link>
             </div>
         </>
     );

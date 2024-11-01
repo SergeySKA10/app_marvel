@@ -9,7 +9,7 @@ import './charList.scss';
 
 
 const CharList = (props) => {
-    const {data, offset, setOffset, setPressBtn, newItemsLoading, dataEnded, onClearList, process} = useList('charsList', 'offsetCharsList', 9);
+    const {data, setData, offset, setOffset, setPressBtn, newItemsLoading, dataEnded, process} = useList('charsList', 'offsetCharsList', 9);
 
     // создание ref 
     const myRef = useRef([]);
@@ -30,35 +30,31 @@ const CharList = (props) => {
             return (
                 <ul className='char__grid'>
                     {data.map((el, i) => (
-                        
-                            <li 
-                                ref={el => myRef.current[i] = el} // с помощью "callback Ref" происходит добавление элементов в массив myRef
-                                className="char__item" 
-                                key={el.id} 
-                                tabIndex={0} 
-                                onClick={() => {
+                        <li 
+                            ref={el => myRef.current[i] = el} // с помощью "callback Ref" происходит добавление элементов в массив myRef
+                            className="char__item" 
+                            key={el.id} 
+                            tabIndex={0} 
+                            onClick={() => {
+                                props.onCharSelected(el.id); 
+                                onFocus(i)
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === ' ' || e.key === "Enter") {
                                     props.onCharSelected(el.id); 
                                     onFocus(i)
-                                }}
-                                onKeyDown={(e) => {
-                                    if (e.key === ' ' || e.key === "Enter") {
-                                        props.onCharSelected(el.id); 
-                                        onFocus(i)
-                                    }
-                                }}>
-
+                                }
+                            }}>
                                 <img src={el.thumbnail} alt={el.description} style={el.thumbnail.includes('image_not_available') ? {objectFit: 'contain'} : null}/>
                                 <div className="char__name">{el.name}</div>
-
-                            </li>
-                       
+                        </li>
                     ))}
                 </ul>
             );
     }
 
     const elements = useMemo(() => {
-        return () =>_createCharList(data)
+        return () =>_createCharList(data);
     }, [data]);
 
     return (
@@ -79,7 +75,7 @@ const CharList = (props) => {
                 </button>
                 <button className="button button__main button__long"
                         disabled={newItemsLoading}
-                        onClick={() => onClearList()}>
+                        onClick={() => setData([])}>
                     <div className="inner">
                             Clear list
                     </div>
