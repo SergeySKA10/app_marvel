@@ -1,3 +1,5 @@
+@import '../../style/variables.scss';
+
 .comics {
     &__list {
         margin-top: 45px;
@@ -11,6 +13,9 @@
     &__item {
         transition: 0.3s transform;
         border-radius: 10px;
+        color: #ffffff;
+        text-align: center;
+        box-shadow: 0 5px 20px #00e6ba;
         &-img {
             box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.25);
             width: 225px;
@@ -18,7 +23,7 @@
             border-radius: 10px;
         }
         &-name {
-            margin-top: 10px;
+            margin: 10px 5px 0 5px;
             font-weight: bold;
             font-size: 14px;
             line-height: 18px;
@@ -28,7 +33,7 @@
             font-weight: bold;
             font-size: 14px;
             line-height: 18px;
-            color: rgba(0, 0, 0, 0.6);
+            color: $main-color;
             text-transform: uppercase;
         }
         &:hover {

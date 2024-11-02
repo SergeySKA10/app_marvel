@@ -54,7 +54,7 @@ const RandomChar = () => {
         }
     };
 
-    const styleWrapper = process === "error" || process === "loading" ? {gridTemplateColumns: 'auto'} : null;
+    const styleWrapper = process === "loading" ? {gridTemplateColumns: 'auto'} : null;
 
     return (
         <div className="randomchar"

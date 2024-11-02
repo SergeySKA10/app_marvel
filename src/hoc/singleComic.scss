@@ -6,12 +6,17 @@
     grid-template-columns: 293px 550px auto;
     column-gap: 50px;
     align-items: sta/rt;
+    background-color: $dark;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px #00e6ba;
+    color: #ffffff;
     &__img {
         max-width: 293px;
         max-height: 450px;
         border-radius: 10px;
     }
     &__name {
+        margin-top: 25px;
         font-weight: bold;
         font-size: 22px;
         line-height: 29px;
